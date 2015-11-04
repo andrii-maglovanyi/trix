@@ -1,2 +1,3 @@
 /.rbenv-vars
 /tmp
+*.sublime-*
