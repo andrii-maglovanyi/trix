@@ -3,6 +3,7 @@
 class Trix.ToolbarController extends Trix.BasicObject
   actionButtonSelector = "button[data-action]"
   attributeButtonSelector = "button[data-attribute]"
+  blockStyleSelector = "select.block"
   toolbarButtonSelector = [actionButtonSelector, attributeButtonSelector].join(", ")
   dialogSelector = ".dialog[data-dialog]"
   activeDialogSelector = "#{dialogSelector}.active"
@@ -75,7 +76,17 @@ class Trix.ToolbarController extends Trix.BasicObject
   # Attribute buttons
 
   updateAttributes: (@attributes) ->
+    @refreshBlockStyleSelect()
     @refreshAttributeButtons()
+
+  refreshBlockStyleSelect: ->
+    select = @element.querySelector(blockStyleSelector)
+    for option in select.querySelectorAll("option")
+      value = option.getAttribute("value")
+      if @attributes[value]
+        select.value = value
+        return
+    select.value = "default"
 
   refreshAttributeButtons: ->
     @eachAttributeButton (element, attributeName) =>
