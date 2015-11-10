@@ -116,6 +116,13 @@ class Trix.Composition extends Trix.BasicObject
     else
       @insertString("\n")
 
+  insertLink: (href, title) ->
+    text = Trix.Text.textForStringWithAttributes(title, href: href)
+    @insertText(text)
+
+    @currentAttributes["href"] = href
+    @notifyDelegateOfCurrentAttributesChange()
+
   insertHTML: (html) ->
     startPosition = @getPosition()
     startLength = @document.getLength()
