@@ -71,7 +71,12 @@ for code, name of Trix.InputController.keyNames
           insertNode(node, callback)
       else
         updated = true
-        compose(string.slice(0, index++), "update", continueComposition)
+        # The cursor doesn't acually move like this during a composition, but
+        # it can move and cause the location range and current attributes to change.
+        # Moving the cursor and then putting it back is enough exercise those changes.
+        moveCursor "left", ->
+          moveCursor "right", ->
+            compose(string.slice(0, index++), "update", continueComposition)
     else
       started = true
       compose(string.slice(0, index++), "start", continueComposition)
@@ -83,69 +88,6 @@ for code, name of Trix.InputController.keyNames
         defer ->
           triggerEvent(element, "click")
           defer(callback)
-
-@moveCursor = (options, callback) ->
-  if typeof options is "string"
-    direction = options
-  else
-    direction = options.direction
-    times = options.times
-
-  times ?= 1
-
-  do move = -> defer ->
-    if triggerEvent(document.activeElement, "keydown", keyCode: keyCodes[direction])
-      selection = window.getSelection()
-      if selection.modify
-        selection.modify("move", direction, "character")
-      else if document.body.createTextRange
-        textRange = document.body.createTextRange()
-        coordinates = getCursorCoordinates()
-        textRange.moveToPoint(coordinates.clientX, coordinates.clientY)
-        textRange.move("character", if direction is "right" then 1 else -1)
-        textRange.select()
-      Trix.selectionChangeObserver.update()
-
-    if --times is 0
-      defer -> callback(getCursorCoordinates())
-    else
-      move()
-
-@expandSelection = (options, callback) -> defer ->
-  if typeof options is "string"
-    direction = options
-  else
-    direction = options.direction
-    times = options.times
-
-  times ?= 1
-
-  do expand = -> defer ->
-    if triggerEvent(document.activeElement, "keydown", keyCode: keyCodes[direction], shiftKey: true)
-      getComposition().expandSelectionInDirection(if direction is "left" then "backward" else "forward")
-
-    if --times is 0
-      defer(callback)
-    else
-      expand()
-
-@collapseSelection = (direction, callback) ->
-  selection = window.getSelection()
-  domRange = selection.getRangeAt(0)
-  newDOMRange = document.createRange()
-  if direction is "left"
-    newDOMRange.setStart(domRange.startContainer, domRange.startOffset)
-  else
-    newDOMRange.setStart(domRange.endContainer, domRange.endOffset)
-  selection.removeAllRanges()
-  selection.addRange(newDOMRange)
-  Trix.selectionChangeObserver.update()
-  defer(callback)
-
-@selectAll = (callback) ->
-  window.getSelection().selectAllChildren(document.activeElement)
-  Trix.selectionChangeObserver.update()
-  defer(callback)
 
 @dragToCoordinates = (coordinates, callback) ->
   element = document.activeElement
@@ -218,41 +160,13 @@ simulateKeypress = (keyName, callback) ->
       insertNode(node, callback)
 
 deleteInDirection = (direction, callback) ->
-  if getDOMRange()?.collapsed
+  if selectionIsCollapsed()
     expandSelection direction, ->
       deleteSelection()
       callback()
   else
     deleteSelection()
     callback()
-
-deleteSelection = ->
-  getDOMRange()?.deleteContents()
-
-insertNode = (node, callback) ->
-  deleteSelection()
-  getDOMRange()?.insertNode(node)
-
-  domRange = document.createRange()
-  domRange.selectNode(node)
-  domRange.collapse(false)
-  setDOMRange(domRange)
-  callback?()
-
-getDOMRange = ->
-  selection = window.getSelection()
-  if selection.rangeCount
-    selection.getRangeAt(0)
-
-setDOMRange = (domRange) ->
-  selection = window.getSelection()
-  selection.removeAllRanges()
-  selection.addRange(domRange)
-
-getCursorCoordinates = ->
-  if rect = window.getSelection().getRangeAt(0).getClientRects()[0]
-    clientX: rect.left
-    clientY: rect.top + rect.height / 2
 
 getElementCoordinates = (element) ->
   rect = element.getBoundingClientRect()

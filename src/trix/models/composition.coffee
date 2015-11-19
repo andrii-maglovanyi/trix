@@ -156,14 +156,15 @@ class Trix.Composition extends Trix.BasicObject
 
     if startPosition is endPosition
       startLocation = @document.locationFromPosition(startPosition)
-      if direction is "backward" and startLocation.offset is 0 and block.isEmpty()
+      if direction is "backward" and startLocation.offset is 0
         if @canDecreaseBlockAttributeLevel()
           if block.isListItem()
             @decreaseListLevel()
           else
             @decreaseBlockAttributeLevel()
+
           @setSelection(startPosition)
-          return
+          return if block.isEmpty()
 
       range = @getExpandedRangeInDirection(direction)
 
@@ -176,6 +177,7 @@ class Trix.Composition extends Trix.BasicObject
     else
       @setDocument(@document.removeTextAtRange(range))
       @setSelection(range[0])
+      false if block.isListItem()
 
   moveTextFromRange: (range) ->
     [position] = @getSelectedRange()
@@ -193,6 +195,21 @@ class Trix.Composition extends Trix.BasicObject
     block = @document.getBlockAtPosition(endPosition)
     @removeCurrentAttribute(block.getLastAttribute())
     @setSelection(startPosition)
+
+  placeholder = " "
+
+  insertPlaceholder: ->
+    @placeholderPosition = @getPosition()
+    @insertString(placeholder)
+    placeholder
+
+  selectPlaceholder: ->
+    if @placeholderPosition?
+      @setSelectedRange([@placeholderPosition, @placeholderPosition + placeholder.length])
+      true
+
+  forgetPlaceholder: ->
+    @placeholderPosition = null
 
   # Current attributes
 

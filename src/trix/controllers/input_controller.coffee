@@ -4,8 +4,6 @@
 {handleEvent, findClosestElementFromNode, findElementFromContainerAndOffset,
   defer, makeElement, innerElementIsActive, summarizeStringChange} = Trix
 
-inputLog = Trix.Logger.get("input")
-
 class Trix.InputController extends Trix.BasicObject
   pastedFileCount = 0
 
@@ -34,9 +32,7 @@ class Trix.InputController extends Trix.BasicObject
       @handleInput ->
         unless innerElementIsActive(@element)
           @eventName = eventName
-          inputLog.group(eventName)
           @events[eventName].call(this, event)
-          inputLog.groupEnd()
 
   setInputSummary: (summary = {}) ->
     @inputSummary.eventName = @eventName
@@ -61,18 +57,11 @@ class Trix.InputController extends Trix.BasicObject
 
   elementDidMutate: (mutationSummary) ->
     @handleInput ->
-      inputLog.group("Mutation")
-      inputLog.log("mutationSummary =", JSON.stringify(mutationSummary))
-      inputLog.log("inputSummary =", JSON.stringify(@inputSummary))
-
       unless @mutationIsExpected(mutationSummary)
-        inputLog.log("mutation is unexpected, replacing HTML")
         @responder?.replaceHTML(@element.innerHTML)
       @resetInputSummary()
       @requestRender()
       Trix.selectionChangeObserver.reset()
-
-      inputLog.groupEnd()
 
   mutationIsExpected: (mutationSummary) ->
     if @inputSummary
@@ -236,21 +225,30 @@ class Trix.InputController extends Trix.BasicObject
       event.preventDefault()
 
     compositionstart: (event) ->
-      @mutationObserver.stop()
+      unless @selectionIsExpanded()
+        textAdded = @responder?.insertPlaceholder()
+        @setInputSummary({textAdded})
+        @requestRender()
+
       @setInputSummary(composing: true, compositionStart: event.data)
 
     compositionupdate: (event) ->
+      if @responder?.selectPlaceholder()
+        @responder?.forgetPlaceholder()
+
       @setInputSummary(composing: true, compositionUpdate: event.data)
 
     compositionend: (event) ->
-      @mutationObserver.start()
-      composedString = event.data
-      @setInputSummary(composing: true, compositionEnd: composedString)
+      if @responder?.selectPlaceholder()
+        @responder?.forgetPlaceholder()
 
-      if composedString? and composedString isnt @inputSummary.compositionStart
+      {compositionStart} = @inputSummary
+      {data} = event
+
+      if compositionStart? and data? and compositionStart isnt data
         @delegate?.inputControllerWillPerformTyping()
-        @responder?.insertString(composedString)
-        {added, removed} = summarizeStringChange(@inputSummary.compositionStart, composedString)
+        @responder?.insertString(data)
+        {added, removed} = summarizeStringChange(compositionStart, data)
         @setInputSummary(textAdded: added, didDelete: Boolean(removed))
 
     input: (event) ->
@@ -343,7 +341,9 @@ class Trix.InputController extends Trix.BasicObject
 
   deleteInDirection: (direction, event) ->
     if @responder?.deleteInDirection(direction) is false
-      event?.preventDefault()
+      if event
+        event.preventDefault()
+        @requestRender()
     else
       @setInputSummary(didDelete: true)
 
