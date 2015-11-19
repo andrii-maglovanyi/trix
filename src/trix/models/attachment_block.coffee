@@ -21,6 +21,9 @@ class Trix.AttachmentBlock extends Trix.Block
   toJSON: ->
     attachment: @attachment.toJSON()
 
+  toString: ->
+    Trix.OBJECT_REPLACEMENT_CHARACTER
+
   # Splittable
 
   getLength: ->

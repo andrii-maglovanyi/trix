@@ -46,7 +46,8 @@ class Trix.AttachmentView extends Trix.ObjectView
 
     shareItem.appendChild(node) for node in @createContentNodes()
 
-    data = {}
+    data =
+      trixId: @attachment.id
 
     if @attachment.isPending()
       @progressElement = makeElement

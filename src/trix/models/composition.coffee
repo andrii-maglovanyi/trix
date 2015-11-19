@@ -450,9 +450,6 @@ class Trix.Composition extends Trix.BasicObject
     @delegate?.compositionDidStopEditingAttachment?(@editingAttachment)
     @editingAttachment = null
 
-  canEditAttachmentCaption: ->
-    @editingAttachment?.isPreviewable()
-
   updateAttributesForAttachment: (attributes, attachment) ->
     @setDocument(@document.updateAttributesForAttachment(attributes, attachment))
 
@@ -472,7 +469,7 @@ class Trix.Composition extends Trix.BasicObject
 
   getAttachmentAtRange: (range) ->
     document = @document.getDocumentAtRange(range)
-    if document.toString() is "#{Trix.OBJECT_REPLACEMENT_CHARACTER}\n"
+    if document.toString() is "#{Trix.OBJECT_REPLACEMENT_CHARACTER}"
       document.getAttachments()[0]
 
   notifyDelegateOfCurrentAttributesChange: ->

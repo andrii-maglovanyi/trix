@@ -4139,7 +4139,9 @@ window.CustomElements.addModule(function(scope) {
         node = ref[i];
         shareItem.appendChild(node);
       }
-      data = {};
+      data = {
+        trixId: this.attachment.id
+      };
       if (this.attachment.isPending()) {
         this.progressElement = makeElement({
           tagName: "progress",
@@ -6103,6 +6105,10 @@ window.CustomElements.addModule(function(scope) {
       };
     };
 
+    AttachmentBlock.prototype.toString = function() {
+      return Trix.OBJECT_REPLACEMENT_CHARACTER;
+    };
+
     AttachmentBlock.prototype.getLength = function() {
       return 1;
     };
@@ -6481,7 +6487,6 @@ window.CustomElements.addModule(function(scope) {
 
     getAttachmentAttributes = function(element) {
       var isImage;
-      console.log(element);
       isImage = element.classList.contains("image");
       return {
         contentType: element.getAttribute("data-mime-type"),
@@ -7980,11 +7985,6 @@ window.CustomElements.addModule(function(scope) {
       return this.editingAttachment = null;
     };
 
-    Composition.prototype.canEditAttachmentCaption = function() {
-      var ref;
-      return (ref = this.editingAttachment) != null ? ref.isPreviewable() : void 0;
-    };
-
     Composition.prototype.updateAttributesForAttachment = function(attributes, attachment) {
       return this.setDocument(this.document.updateAttributesForAttachment(attributes, attachment));
     };
@@ -8013,7 +8013,7 @@ window.CustomElements.addModule(function(scope) {
     Composition.prototype.getAttachmentAtRange = function(range) {
       var document;
       document = this.document.getDocumentAtRange(range);
-      if (document.toString() === (Trix.OBJECT_REPLACEMENT_CHARACTER + "\n")) {
+      if (document.toString() === ("" + Trix.OBJECT_REPLACEMENT_CHARACTER)) {
         return document.getAttachments()[0];
       }
     };
@@ -9394,8 +9394,11 @@ window.CustomElements.addModule(function(scope) {
     EditorController.prototype.compositionDidStartEditingAttachment = function(attachment) {
       var attachmentRange, document;
       document = this.composition.document;
+      console.log(document);
       attachmentRange = document.getRangeOfAttachment(attachment);
+      console.log(attachmentRange);
       this.attachmentLocationRange = document.locationRangeFromRange(attachmentRange);
+      console.log(this.attachmentLocationRange);
       this.compositionController.installAttachmentEditorForAttachment(attachment);
       return this.selectionManager.setLocationRange(this.attachmentLocationRange);
     };
