@@ -37,3 +37,6 @@ Trix.config.blockAttributes = attributes =
     tagName: "h3"
     test: (element) ->
       Trix.tagName(element) is "h3"
+  attachment:
+    tagName: "div"
+    className: "shareitem"

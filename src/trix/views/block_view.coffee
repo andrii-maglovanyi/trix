@@ -1,3 +1,5 @@
+#= require trix/views/attachment_view
+#= require trix/views/previewable_attachment_view
 #= require trix/views/text_view
 
 {makeElement} = Trix
@@ -9,8 +11,12 @@ class Trix.BlockView extends Trix.ObjectView
     @attributes = @block.getAttributes()
 
   createNodes: ->
+    if @block.hasAttachment()
+      return @createAttachmentNodes()
+
     comment = document.createComment("block")
     nodes = [comment]
+
     if @block.isEmpty()
       nodes.push(makeElement("br"))
     else
@@ -25,6 +31,16 @@ class Trix.BlockView extends Trix.ObjectView
       element = makeElement(Trix.config.blockAttributes.default.tagName)
       element.appendChild(node) for node in nodes
       [element]
+
+  createAttachmentNodes: ->
+    attachment = @block.getAttachment()
+    constructor = if attachment.isPreviewable()
+      Trix.PreviewableAttachmentView
+    else
+      Trix.AttachmentView
+
+    view = @createChildView(constructor, attachment)
+    view.getNodes()
 
   createContainerElement: (depth) ->
     attribute = @attributes[depth]

@@ -1,4 +1,5 @@
 #= require trix/models/block
+#= require trix/models/attachment_block
 #= require trix/models/splittable_list
 #= require trix/models/html_parser
 
@@ -431,25 +432,16 @@ class Trix.Document extends Trix.Object
   getAttachmentById: (attachmentId) ->
     return attachment for attachment in @getAttachments() when attachment.id is attachmentId
 
-  getAttachmentPieces: ->
-    attachmentPieces = []
-    @blockList.eachObject ({text}) ->
-      attachmentPieces = attachmentPieces.concat(text.getAttachmentPieces())
-    attachmentPieces
-
   getAttachments: ->
-    piece.attachment for piece in @getAttachmentPieces()
+    block.attachment for block in @getBlocks() when block.attachment?
 
   getRangeOfAttachment: (attachment) ->
     position = 0
-    for {text}, index in @blockList.toArray()
-      if textRange = text.getRangeOfAttachment(attachment)
-        return normalizeRange([position + textRange[0], position + textRange[1]])
-      position += text.getLength()
+    for block, index in @getBlocks()
+      if block.hasAttachment() and block.getAttachment().isEqualTo(attachment)
+        return normalizeRange([position, position + block.text.getLength()])
+      position += block.text.getLength()
     return
-
-  getAttachmentPieceForAttachment: (attachment) ->
-    return piece for piece in @getAttachmentPieces() when piece.attachment is attachment
 
   rangeFromLocationRange: (locationRange) ->
     locationRange = normalizeRange(locationRange)

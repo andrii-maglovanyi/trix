@@ -11,23 +11,9 @@ editorTest "moving an image by drag and drop", (expectDocument) ->
 
 editorTest "removing an image", (expectDocument) ->
   after 20, ->
-    clickElement getFigure(), ->
-      closeButton = getFigure().querySelector(".#{Trix.config.css.classNames.attachment.removeButton}")
-      clickElement closeButton, ->
-        expectDocument "ab\n"
-
-editorTest "editing an image caption", (expectDocument) ->
-  after 20, ->
-    clickElement findElement("figure"), ->
-      clickElement findElement("figcaption"), ->
-        defer ->
-          ok findElement("textarea")
-          findElement("textarea").focus()
-          findElement("textarea").value = "my caption"
-          pressKey "return", ->
-            ok not findElement("textarea")
-            expectAttributes [2, 3], caption: "my caption"
-            expectDocument "ab#{Trix.OBJECT_REPLACEMENT_CHARACTER}\n"
+    closeButton = findElement(".#{Trix.config.css.classNames.attachment.removeButton}")
+    clickElement closeButton, ->
+      expectDocument "ab\n"
 
 getFigure = ->
   findElement("figure")

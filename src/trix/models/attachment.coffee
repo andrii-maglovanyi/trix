@@ -11,6 +11,7 @@ class Trix.Attachment extends Trix.Object
 
   @attributesForFile: (file) ->
     new Trix.Hash
+      eid:         file.EID
       filename:    file.name
       filesize:    file.size
       contentType: file.type

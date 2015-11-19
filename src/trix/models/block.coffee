@@ -3,9 +3,16 @@
 {arraysAreEqual} = Trix
 
 class Trix.Block extends Trix.Object
+  @blockForAttachment: (attachment) ->
+    new Trix.AttachmentBlock attachment
+
   @fromJSON: (blockJSON) ->
-    text = Trix.Text.fromJSON(blockJSON.text)
-    new this text, blockJSON.attributes
+    if blockJSON.attachment?
+      attachment = Trix.Attachment.fromJSON(blockJSON.attachment)
+      @blockForAttachment(attachment)
+    else
+      text = Trix.Text.fromJSON(blockJSON.text)
+      new this text, blockJSON.attributes
 
   constructor: (text = new Trix.Text, attributes = []) ->
     super
@@ -20,6 +27,9 @@ class Trix.Block extends Trix.Object
       @text.isEqualTo(block?.text) and
       arraysAreEqual(@attributes, block?.attributes)
     )
+
+  hasAttachment: ->
+    false
 
   copyWithText: (text) ->
     new @constructor text, @attributes

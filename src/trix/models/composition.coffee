@@ -147,8 +147,8 @@ class Trix.Composition extends Trix.BasicObject
       @insertAttachment(attachment)
 
   insertAttachment: (attachment) ->
-    text = Trix.Text.textForAttachmentWithAttributes(attachment, @currentAttributes)
-    @insertBlock(new Trix.Block text)
+    block = Trix.Block.blockForAttachment(attachment)
+    @insertBlock(block)
 
   deleteInDirection: (direction) ->
     range = [startPosition, endPosition] = @getSelectedRange()
