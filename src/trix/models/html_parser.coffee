@@ -208,7 +208,6 @@ class Trix.HTMLParser extends Trix.BasicObject
     attributes.reverse()
 
   getAttachmentAttributes = (element) ->
-    console.log(element)
     isImage = element.classList.contains("image")
     {
       contentType: element.getAttribute("data-mime-type"),
