@@ -189,7 +189,9 @@ class Trix.Document extends Trix.Object
   removeAttributeAtRange: (attribute, range) ->
     blockList = @blockList
     @eachBlockAtRange range, (block, textRange, index) ->
-      if Trix.config.blockAttributes[attribute]
+      if attribute is "attachment"
+        blockList = blockList.removeObjectAtIndex index
+      else if Trix.config.blockAttributes[attribute]
         blockList = blockList.editObjectAtIndex index, ->
           block.removeAttribute(attribute)
       else if textRange[0] isnt textRange[1]

@@ -6833,7 +6833,9 @@ window.CustomElements.addModule(function(scope) {
       var blockList;
       blockList = this.blockList;
       this.eachBlockAtRange(range, function(block, textRange, index) {
-        if (Trix.config.blockAttributes[attribute]) {
+        if (attribute === "attachment") {
+          return blockList = blockList.removeObjectAtIndex(index);
+        } else if (Trix.config.blockAttributes[attribute]) {
           return blockList = blockList.editObjectAtIndex(index, function() {
             return block.removeAttribute(attribute);
           });
@@ -7584,7 +7586,7 @@ window.CustomElements.addModule(function(scope) {
       var range;
       if (range = this.document.getRangeOfAttachment(attachment)) {
         this.stopEditingAttachment();
-        this.setDocument(this.document.removeTextAtRange(range));
+        this.setDocument(this.document.removeAttributeAtRange("attachment", range));
         return this.setSelection(range[0]);
       }
     };
