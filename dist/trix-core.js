@@ -2904,7 +2904,7 @@ http://trix-editor.org/
     };
 
     AttachmentView.prototype.createNodes = function() {
-      var data, element, href, i, key, len, node, ref, shareItem, value;
+      var comment, data, element, href, i, key, len, node, ref, shareItem, value;
       shareItem = makeElement({
         tagName: "div",
         attributes: {
@@ -2915,6 +2915,8 @@ http://trix-editor.org/
           rel: "attachment"
         }
       });
+      comment = document.createComment("block");
+      shareItem.appendChild(comment);
       ref = this.createContentNodes();
       for (i = 0, len = ref.length; i < len; i++) {
         node = ref[i];
@@ -7485,23 +7487,25 @@ http://trix-editor.org/
     }
 
     LocationMapper.prototype.findLocationFromContainerAndOffset = function(container, offset) {
-      var attachmentElement, childIndex, foundBlock, location, node, walker;
+      var childIndex, foundBlock, location, node, walker;
       childIndex = 0;
       foundBlock = false;
       location = {
         index: 0,
         offset: 0
       };
-      if (attachmentElement = this.findAttachmentElementParentForNode(container)) {
-        container = attachmentElement.parentNode;
-        offset = findChildIndexOfNode(attachmentElement);
-      }
       walker = walkTree(this.element, {
         usingFilter: rejectAttachmentContents
       });
       while (walker.nextNode()) {
         node = walker.currentNode;
-        if (node === container && nodeIsTextNode(container)) {
+        if (nodeIsAttachmentElement(node)) {
+          location.index++;
+          location.offset = 0;
+          if (node === container) {
+            break;
+          }
+        } else if (node === container && nodeIsTextNode(container)) {
           if (!nodeIsCursorTarget(node)) {
             location.offset += offset;
           }
@@ -7548,7 +7552,10 @@ http://trix-editor.org/
       if (!node) {
         return;
       }
-      if (nodeIsTextNode(node)) {
+      if (nodeIsAttachmentElement(node)) {
+        container = node;
+        offset = 0;
+      } else if (nodeIsTextNode(node)) {
         container = node;
         string = node.textContent;
         offset = location.offset - nodeOffset;
@@ -7598,15 +7605,6 @@ http://trix-editor.org/
       return [node, nodeOffset];
     };
 
-    LocationMapper.prototype.findAttachmentElementParentForNode = function(node) {
-      while (node && node !== this.element) {
-        if (nodeIsAttachmentElement(node)) {
-          return node;
-        }
-        node = node.parentNode;
-      }
-    };
-
     LocationMapper.prototype.getSignificantNodesForIndex = function(index) {
       var blockIndex, node, nodes, recordingNodes, walker;
       nodes = [];
@@ -7616,14 +7614,18 @@ http://trix-editor.org/
       recordingNodes = false;
       while (walker.nextNode()) {
         node = walker.currentNode;
-        if (nodeIsBlockStartComment(node)) {
+        if (nodeIsBlockStartComment(node) || nodeIsAttachmentElement(node)) {
           if (typeof blockIndex !== "undefined" && blockIndex !== null) {
             blockIndex++;
           } else {
             blockIndex = 0;
           }
           if (blockIndex === index) {
-            recordingNodes = true;
+            if (nodeIsAttachmentElement(node)) {
+              nodes.push(node);
+            } else {
+              recordingNodes = true;
+            }
           } else if (recordingNodes) {
             break;
           }
@@ -8175,11 +8177,8 @@ http://trix-editor.org/
     EditorController.prototype.compositionDidStartEditingAttachment = function(attachment) {
       var attachmentRange, document;
       document = this.composition.document;
-      console.log(document);
       attachmentRange = document.getRangeOfAttachment(attachment);
-      console.log(attachmentRange);
       this.attachmentLocationRange = document.locationRangeFromRange(attachmentRange);
-      console.log(this.attachmentLocationRange);
       this.compositionController.installAttachmentEditorForAttachment(attachment);
       return this.selectionManager.setLocationRange(this.attachmentLocationRange);
     };

@@ -44,6 +44,9 @@ class Trix.AttachmentView extends Trix.ObjectView
         eid: @attachment.getAttribute("eid")
         rel: "attachment"
 
+    comment = document.createComment("block")
+    shareItem.appendChild(comment)
+
     shareItem.appendChild(node) for node in @createContentNodes()
 
     data =

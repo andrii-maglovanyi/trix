@@ -11,16 +11,17 @@ class Trix.LocationMapper
     foundBlock = false
     location = index: 0, offset: 0
 
-    if attachmentElement = @findAttachmentElementParentForNode(container)
-      container = attachmentElement.parentNode
-      offset = findChildIndexOfNode(attachmentElement)
-
     walker = walkTree(@element, usingFilter: rejectAttachmentContents)
 
     while walker.nextNode()
       node = walker.currentNode
 
-      if node is container and nodeIsTextNode(container)
+      if nodeIsAttachmentElement(node)
+        location.index++
+        location.offset = 0
+        break if node is container
+
+      else if node is container and nodeIsTextNode(container)
         unless nodeIsCursorTarget(node)
           location.offset += offset
         break
@@ -56,7 +57,11 @@ class Trix.LocationMapper
     [node, nodeOffset] = @findNodeAndOffsetFromLocation(location)
     return unless node
 
-    if nodeIsTextNode(node)
+    if nodeIsAttachmentElement(node)
+      container = node
+      offset = 0
+
+    else if nodeIsTextNode(node)
       container = node
       string = node.textContent
       offset = location.offset - nodeOffset
@@ -98,11 +103,6 @@ class Trix.LocationMapper
 
   # Private
 
-  findAttachmentElementParentForNode: (node) ->
-    while node and node isnt @element
-      return node if nodeIsAttachmentElement(node)
-      node = node.parentNode
-
   getSignificantNodesForIndex: (index) ->
     nodes = []
     walker = walkTree(@element, usingFilter: acceptSignificantNodes)
@@ -110,14 +110,17 @@ class Trix.LocationMapper
 
     while walker.nextNode()
       node = walker.currentNode
-      if nodeIsBlockStartComment(node)
+      if nodeIsBlockStartComment(node) or nodeIsAttachmentElement(node)
         if blockIndex?
           blockIndex++
         else
           blockIndex = 0
 
         if blockIndex is index
-          recordingNodes = true
+          if nodeIsAttachmentElement(node)
+            nodes.push(node)
+          else
+            recordingNodes = true
         else if recordingNodes
           break
       else if recordingNodes
