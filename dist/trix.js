@@ -4131,6 +4131,7 @@ window.CustomElements.addModule(function(scope) {
         },
         data: {
           eid: this.attachment.getAttribute("eid"),
+          mimeType: this.attachment.getContentType(),
           rel: "attachment"
         }
       });
@@ -6093,6 +6094,14 @@ window.CustomElements.addModule(function(scope) {
       return this.attachment;
     };
 
+    AttachmentBlock.prototype.copyWithText = function() {
+      return new this.constructor(this.attachment);
+    };
+
+    AttachmentBlock.prototype.copyWithAttributes = function() {
+      return new this.constructor(this.attachment);
+    };
+
     AttachmentBlock.prototype.isEmpty = function() {
       return false;
     };
@@ -6146,7 +6155,7 @@ window.CustomElements.addModule(function(scope) {
 
     extend1(HTMLParser, superClass);
 
-    allowedAttributes = "style href src width height class target data-eid data-mime-type data-rel".split(" ");
+    allowedAttributes = "style href src width height class target data-eid data-href data-mime-type data-rel".split(" ");
 
     HTMLParser.parse = function(html, options) {
       var parser;
@@ -6488,14 +6497,14 @@ window.CustomElements.addModule(function(scope) {
     };
 
     getAttachmentAttributes = function(element) {
-      var isImage;
+      var a, isImage;
       isImage = element.classList.contains("image");
       return {
         contentType: element.getAttribute("data-mime-type"),
         eid: element.getAttribute("data-eid"),
         filename: isImage ? "" : element.querySelector("a").textContent,
         previewable: isImage,
-        url: isImage ? element.querySelector("img").getAttribute("src") : element.querySelector("a").getAttribute("href")
+        url: isImage ? element.querySelector("img").getAttribute("src") : (a = element.querySelector("a"), a.getAttribute("data-href") || a.getAttribute("href"))
       };
     };
 
@@ -6779,7 +6788,7 @@ window.CustomElements.addModule(function(scope) {
       if (movingRightward) {
         position -= document.getLength();
       }
-      if (!result.firstBlockInRangeIsEntirelySelected(range)) {
+      if (!this.firstBlockInRangeIsEntirelySelected(range)) {
         ref1 = document.getBlocks(), firstBlock = ref1[0], blocks = 2 <= ref1.length ? slice.call(ref1, 1) : [];
         if (blocks.length === 0) {
           text = firstBlock.getTextWithoutBlockBreak();

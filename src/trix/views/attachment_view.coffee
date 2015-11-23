@@ -42,6 +42,7 @@ class Trix.AttachmentView extends Trix.ObjectView
         class: @getClassName()
       data:
         eid: @attachment.getAttribute("eid")
+        mimeType: @attachment.getContentType()
         rel: "attachment"
 
     comment = document.createComment("block")

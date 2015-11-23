@@ -150,7 +150,7 @@ class Trix.Document extends Trix.Object
     movingRightward = startPosition < position
     position -= document.getLength() if movingRightward
 
-    unless result.firstBlockInRangeIsEntirelySelected(range)
+    unless @firstBlockInRangeIsEntirelySelected(range)
       [firstBlock, blocks...] = document.getBlocks()
       if blocks.length is 0
         text = firstBlock.getTextWithoutBlockBreak()

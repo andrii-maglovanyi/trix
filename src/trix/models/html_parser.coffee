@@ -2,7 +2,7 @@
  findClosestElementFromNode, elementContainsNode, nodeIsAttachmentElement, extend} = Trix
 
 class Trix.HTMLParser extends Trix.BasicObject
-  allowedAttributes = "style href src width height class target data-eid data-mime-type data-rel".split(" ")
+  allowedAttributes = "style href src width height class target data-eid data-href data-mime-type data-rel".split(" ")
 
   @parse: (html, options) ->
     parser = new this html, options
@@ -217,7 +217,8 @@ class Trix.HTMLParser extends Trix.BasicObject
       url: if isImage
         element.querySelector("img").getAttribute("src")
       else
-        element.querySelector("a").getAttribute("href")
+        a = element.querySelector("a")
+        a.getAttribute("data-href") or a.getAttribute("href")
     }
 
   sanitizeHTML = (html) ->

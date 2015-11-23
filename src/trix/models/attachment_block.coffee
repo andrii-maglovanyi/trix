@@ -12,6 +12,12 @@ class Trix.AttachmentBlock extends Trix.Block
   getAttachment: ->
     @attachment
 
+  copyWithText: ->
+    new @constructor @attachment
+
+  copyWithAttributes: ->
+    new @constructor @attachment
+
   isEmpty: ->
     false
 
