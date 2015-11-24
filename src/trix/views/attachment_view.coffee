@@ -67,16 +67,10 @@ class Trix.AttachmentView extends Trix.ObjectView
       shareItem.appendChild(@progressElement)
       data.trixSerialize = false
 
-    if href = @getHref()
-      element = makeElement("a", {href})
-      element.appendChild(shareItem)
-    else
-      element = shareItem
+    shareItem.dataset[key] = value for key, value of data
+    shareItem.setAttribute("contenteditable", false)
 
-    element.dataset[key] = value for key, value of data
-    element.setAttribute("contenteditable", false)
-
-    [element]
+    [shareItem]
 
   getClassName: ->
     names = [
