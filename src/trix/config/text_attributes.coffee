@@ -1,12 +1,12 @@
 Trix.config.textAttributes =
   bold:
-    tagName: "strong"
+    tagName: "b"
     inheritable: true
     parser: (element) ->
       style = window.getComputedStyle(element)
       style["fontWeight"] is "bold" or style["fontWeight"] >= 700
   italic:
-    tagName: "em"
+    tagName: "i"
     inheritable: true
     parser: (element) ->
       style = window.getComputedStyle(element)
