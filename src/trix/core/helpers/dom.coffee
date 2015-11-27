@@ -162,7 +162,12 @@ Trix.extend
       Trix.nodeIsCursorTarget(node.firstChild)
 
   nodeIsAttachmentElement: (node) ->
-    Trix.elementMatchesSelector(node, Trix.AttachmentView.attachmentSelector)
+    (
+      node.nodeType is Node.ELEMENT_NODE and
+      node.classList.contains("attachment-wrapper") and
+      node.childElementCount is 1 and
+      Trix.elementMatchesSelector(node.firstElementChild, Trix.AttachmentView.attachmentSelector)
+    )
 
   nodeIsEmptyTextNode: (node) ->
     Trix.nodeIsTextNode(node) and node?.data is ""

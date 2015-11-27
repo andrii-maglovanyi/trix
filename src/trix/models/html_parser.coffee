@@ -208,16 +208,17 @@ class Trix.HTMLParser extends Trix.BasicObject
     attributes.reverse()
 
   getAttachmentAttributes = (element) ->
-    isImage = element.classList.contains("image")
+    shareItem = element.firstElementChild
+    isImage = shareItem.classList.contains("image")
     {
-      contentType: element.getAttribute("data-mime-type"),
-      eid: element.getAttribute("data-eid"),
-      filename: if isImage then "" else element.querySelector("a").textContent
+      contentType: shareItem.getAttribute("data-mime-type"),
+      eid: shareItem.getAttribute("data-eid"),
+      filename: if isImage then "" else shareItem.querySelector("a").textContent
       previewable: isImage,
       url: if isImage
-        element.querySelector("img").getAttribute("src")
+        shareItem.querySelector("img").getAttribute("src")
       else
-        a = element.querySelector("a")
+        a = shareItem.querySelector("a")
         a.getAttribute("data-href") or a.getAttribute("href")
     }
 
