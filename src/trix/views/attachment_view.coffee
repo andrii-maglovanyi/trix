@@ -40,6 +40,7 @@ class Trix.AttachmentView extends Trix.ObjectView
       tagName: "div"
       attributes:
         class: "attachment-wrapper"
+        contenteditable: false
 
     comment = document.createComment("block")
     wrapper.appendChild(comment)
@@ -73,7 +74,6 @@ class Trix.AttachmentView extends Trix.ObjectView
       data.trixSerialize = false
 
     shareItem.dataset[key] = value for key, value of data
-    shareItem.setAttribute("contenteditable", false)
 
     wrapper.appendChild(shareItem)
 
