@@ -556,7 +556,7 @@ http://trix-editor.org/
         return Trix.nodeIsCursorTarget(node.firstChild);
       }
     },
-    nodeIsAttachmentElement: function(node) {
+    nodeIsAttachmentWrapper: function(node) {
       return node.nodeType === Node.ELEMENT_NODE && node.classList.contains("attachment-wrapper") && node.childElementCount === 1 && Trix.elementMatchesSelector(node.firstElementChild, Trix.AttachmentView.attachmentSelector);
     },
     nodeIsEmptyTextNode: function(node) {
@@ -4922,13 +4922,13 @@ http://trix-editor.org/
 
 }).call(this);
 (function() {
-  var arraysAreEqual, elementContainsNode, extend, findClosestElementFromNode, makeElement, nodeIsAttachmentElement, normalizeSpaces, tagName, walkTree,
+  var arraysAreEqual, elementContainsNode, extend, findClosestElementFromNode, makeElement, nodeIsAttachmentWrapper, normalizeSpaces, tagName, walkTree,
     extend1 = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     slice = [].slice;
 
-  arraysAreEqual = Trix.arraysAreEqual, normalizeSpaces = Trix.normalizeSpaces, makeElement = Trix.makeElement, tagName = Trix.tagName, walkTree = Trix.walkTree, findClosestElementFromNode = Trix.findClosestElementFromNode, elementContainsNode = Trix.elementContainsNode, nodeIsAttachmentElement = Trix.nodeIsAttachmentElement, extend = Trix.extend;
+  arraysAreEqual = Trix.arraysAreEqual, normalizeSpaces = Trix.normalizeSpaces, makeElement = Trix.makeElement, tagName = Trix.tagName, walkTree = Trix.walkTree, findClosestElementFromNode = Trix.findClosestElementFromNode, elementContainsNode = Trix.elementContainsNode, nodeIsAttachmentWrapper = Trix.nodeIsAttachmentWrapper, extend = Trix.extend;
 
   Trix.HTMLParser = (function(superClass) {
     var allowedAttributes, blockForAttachment, blockForAttributes, getAttachmentAttributes, getBlockAttributes, getBlockElementMargin, getImageDimensions, getTextAttributes, nodeFilter, pieceForString, removeInsignificantWhitespace, sanitizeHTML;
@@ -5000,7 +5000,7 @@ http://trix-editor.org/
         case Node.TEXT_NODE:
           return this.processTextNode(node);
         case Node.ELEMENT_NODE:
-          if (!nodeIsAttachmentElement(node)) {
+          if (!nodeIsAttachmentWrapper(node)) {
             this.appendBlockForElement(node);
           }
           return this.processElement(node);
@@ -5078,7 +5078,7 @@ http://trix-editor.org/
 
     HTMLParser.prototype.processElement = function(element) {
       var attributes;
-      if (nodeIsAttachmentElement(element)) {
+      if (nodeIsAttachmentWrapper(element)) {
         attributes = getAttachmentAttributes(element);
         this.appendAttachmentForAttributesWithElement(attributes, element);
         element.innerHTML = "";
@@ -7486,9 +7486,9 @@ http://trix-editor.org/
 
 }).call(this);
 (function() {
-  var elementContainsNode, findChildIndexOfNode, findClosestElementFromNode, findNodeFromContainerAndOffset, nodeIsAttachmentElement, nodeIsBlockContainer, nodeIsBlockStartComment, nodeIsCursorTarget, nodeIsEmptyTextNode, nodeIsTextNode, tagName, walkTree;
+  var elementContainsNode, findChildIndexOfNode, findClosestElementFromNode, findNodeFromContainerAndOffset, nodeIsAttachmentWrapper, nodeIsBlockContainer, nodeIsBlockStartComment, nodeIsCursorTarget, nodeIsEmptyTextNode, nodeIsTextNode, tagName, walkTree;
 
-  elementContainsNode = Trix.elementContainsNode, findChildIndexOfNode = Trix.findChildIndexOfNode, findClosestElementFromNode = Trix.findClosestElementFromNode, findNodeFromContainerAndOffset = Trix.findNodeFromContainerAndOffset, nodeIsBlockStartComment = Trix.nodeIsBlockStartComment, nodeIsBlockContainer = Trix.nodeIsBlockContainer, nodeIsCursorTarget = Trix.nodeIsCursorTarget, nodeIsEmptyTextNode = Trix.nodeIsEmptyTextNode, nodeIsTextNode = Trix.nodeIsTextNode, nodeIsAttachmentElement = Trix.nodeIsAttachmentElement, tagName = Trix.tagName, walkTree = Trix.walkTree;
+  elementContainsNode = Trix.elementContainsNode, findChildIndexOfNode = Trix.findChildIndexOfNode, findClosestElementFromNode = Trix.findClosestElementFromNode, findNodeFromContainerAndOffset = Trix.findNodeFromContainerAndOffset, nodeIsBlockStartComment = Trix.nodeIsBlockStartComment, nodeIsBlockContainer = Trix.nodeIsBlockContainer, nodeIsCursorTarget = Trix.nodeIsCursorTarget, nodeIsEmptyTextNode = Trix.nodeIsEmptyTextNode, nodeIsTextNode = Trix.nodeIsTextNode, nodeIsAttachmentWrapper = Trix.nodeIsAttachmentWrapper, tagName = Trix.tagName, walkTree = Trix.walkTree;
 
   Trix.LocationMapper = (function() {
     var acceptSignificantNodes, nodeLength, rejectAttachmentContents, rejectEmptyTextNodes;
@@ -7510,12 +7510,15 @@ http://trix-editor.org/
       });
       while (walker.nextNode()) {
         node = walker.currentNode;
-        if (nodeIsAttachmentElement(node)) {
-          location.index++;
-          location.offset = 0;
-          if (node.firstElementChild === container) {
+        if (nodeIsAttachmentWrapper(node)) {
+          if (foundBlock) {
+            location.index++;
+          }
+          location.offset = offset;
+          if (node === container || node.firstElementChild === container) {
             break;
           }
+          foundBlock = true;
         } else if (node === container && nodeIsTextNode(container)) {
           if (!nodeIsCursorTarget(node)) {
             location.offset += offset;
@@ -7552,6 +7555,10 @@ http://trix-editor.org/
         offset = 0;
         while (container.firstChild) {
           container = container.firstChild;
+          if (nodeIsAttachmentWrapper(container)) {
+            container = container.firstElementChild;
+            break;
+          }
           if (nodeIsBlockContainer(container)) {
             offset = 1;
             break;
@@ -7563,9 +7570,9 @@ http://trix-editor.org/
       if (!node) {
         return;
       }
-      if (nodeIsAttachmentElement(node)) {
+      if (nodeIsAttachmentWrapper(node)) {
         container = node.firstElementChild;
-        offset = 0;
+        offset = location.offset;
       } else if (nodeIsTextNode(node)) {
         container = node;
         string = node.textContent;
@@ -7597,6 +7604,13 @@ http://trix-editor.org/
         currentNode = ref[i];
         length = nodeLength(currentNode);
         if (location.offset <= offset + length) {
+          if (nodeIsAttachmentWrapper(currentNode)) {
+            node = currentNode;
+            nodeOffset = offset;
+            if (location.offset === nodeOffset) {
+              break;
+            }
+          }
           if (nodeIsTextNode(currentNode)) {
             node = currentNode;
             nodeOffset = offset;
@@ -7625,14 +7639,14 @@ http://trix-editor.org/
       recordingNodes = false;
       while (walker.nextNode()) {
         node = walker.currentNode;
-        if (nodeIsBlockStartComment(node) || nodeIsAttachmentElement(node)) {
+        if (nodeIsBlockStartComment(node) || nodeIsAttachmentWrapper(node)) {
           if (typeof blockIndex !== "undefined" && blockIndex !== null) {
             blockIndex++;
           } else {
             blockIndex = 0;
           }
           if (blockIndex === index) {
-            if (nodeIsAttachmentElement(node)) {
+            if (nodeIsAttachmentWrapper(node)) {
               nodes.push(node);
             } else {
               recordingNodes = true;
@@ -7656,7 +7670,7 @@ http://trix-editor.org/
           string = node.textContent;
           return string.length;
         }
-      } else if (tagName(node) === "br" || nodeIsAttachmentElement(node)) {
+      } else if (tagName(node) === "br" || nodeIsAttachmentWrapper(node)) {
         return 1;
       } else {
         return 0;
@@ -7680,7 +7694,7 @@ http://trix-editor.org/
     };
 
     rejectAttachmentContents = function(node) {
-      if (nodeIsAttachmentElement(node.parentNode)) {
+      if (nodeIsAttachmentWrapper(node.parentNode)) {
         return NodeFilter.FILTER_REJECT;
       } else {
         return NodeFilter.FILTER_ACCEPT;

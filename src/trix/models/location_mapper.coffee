@@ -1,6 +1,6 @@
 {elementContainsNode, findChildIndexOfNode, findClosestElementFromNode,
  findNodeFromContainerAndOffset, nodeIsBlockStartComment, nodeIsBlockContainer,
- nodeIsCursorTarget, nodeIsEmptyTextNode, nodeIsTextNode, nodeIsAttachmentElement,
+ nodeIsCursorTarget, nodeIsEmptyTextNode, nodeIsTextNode, nodeIsAttachmentWrapper,
  tagName, walkTree} = Trix
 
 class Trix.LocationMapper
@@ -16,10 +16,11 @@ class Trix.LocationMapper
     while walker.nextNode()
       node = walker.currentNode
 
-      if nodeIsAttachmentElement(node)
-        location.index++
-        location.offset = 0
-        break if node.firstElementChild is container
+      if nodeIsAttachmentWrapper(node)
+        location.index++ if foundBlock
+        location.offset = offset
+        break if node is container or node.firstElementChild is container
+        foundBlock = true
 
       else if node is container and nodeIsTextNode(container)
         unless nodeIsCursorTarget(node)
@@ -48,6 +49,9 @@ class Trix.LocationMapper
 
       while container.firstChild
         container = container.firstChild
+        if nodeIsAttachmentWrapper(container)
+          container = container.firstElementChild
+          break
         if nodeIsBlockContainer(container)
           offset = 1
           break
@@ -57,9 +61,9 @@ class Trix.LocationMapper
     [node, nodeOffset] = @findNodeAndOffsetFromLocation(location)
     return unless node
 
-    if nodeIsAttachmentElement(node)
+    if nodeIsAttachmentWrapper(node)
       container = node.firstElementChild
-      offset = 0
+      offset = location.offset
 
     else if nodeIsTextNode(node)
       container = node
@@ -87,6 +91,11 @@ class Trix.LocationMapper
       length = nodeLength(currentNode)
 
       if location.offset <= offset + length
+        if nodeIsAttachmentWrapper(currentNode)
+          node = currentNode
+          nodeOffset = offset
+          break if location.offset is nodeOffset
+
         if nodeIsTextNode(currentNode)
           node = currentNode
           nodeOffset = offset
@@ -110,14 +119,14 @@ class Trix.LocationMapper
 
     while walker.nextNode()
       node = walker.currentNode
-      if nodeIsBlockStartComment(node) or nodeIsAttachmentElement(node)
+      if nodeIsBlockStartComment(node) or nodeIsAttachmentWrapper(node)
         if blockIndex?
           blockIndex++
         else
           blockIndex = 0
 
         if blockIndex is index
-          if nodeIsAttachmentElement(node)
+          if nodeIsAttachmentWrapper(node)
             nodes.push(node)
           else
             recordingNodes = true
@@ -135,7 +144,7 @@ class Trix.LocationMapper
       else
         string = node.textContent
         string.length
-    else if tagName(node) is "br" or nodeIsAttachmentElement(node)
+    else if tagName(node) is "br" or nodeIsAttachmentWrapper(node)
       1
     else
       0
@@ -153,7 +162,7 @@ class Trix.LocationMapper
       NodeFilter.FILTER_ACCEPT
 
   rejectAttachmentContents = (node) ->
-    if nodeIsAttachmentElement(node.parentNode)
+    if nodeIsAttachmentWrapper(node.parentNode)
       NodeFilter.FILTER_REJECT
     else
       NodeFilter.FILTER_ACCEPT

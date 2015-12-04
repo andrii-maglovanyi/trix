@@ -161,7 +161,7 @@ Trix.extend
     else
       Trix.nodeIsCursorTarget(node.firstChild)
 
-  nodeIsAttachmentElement: (node) ->
+  nodeIsAttachmentWrapper: (node) ->
     (
       node.nodeType is Node.ELEMENT_NODE and
       node.classList.contains("attachment-wrapper") and
