@@ -1,6 +1,6 @@
 
 /*
-Trix 0.9.1
+Trix 0.9.2
 Copyright © 2015 Basecamp, LLC
 http://trix-editor.org/
  */
@@ -11,7 +11,7 @@ http://trix-editor.org/
 }).call(this);
 (function() {
   this.Trix = {
-    VERSION: "0.9.1",
+    VERSION: "0.9.2",
     ZERO_WIDTH_SPACE: "\uFEFF",
     NON_BREAKING_SPACE: "\u00A0",
     OBJECT_REPLACEMENT_CHARACTER: "\uFFFC",
@@ -569,130 +569,6 @@ http://trix-editor.org/
 
 }).call(this);
 (function() {
-  var copyValue, normalizeRange, rangeValuesAreEqual;
-
-  Trix.extend({
-    normalizeRange: normalizeRange = function(range) {
-      var ref;
-      if (range == null) {
-        return;
-      }
-      if (!Array.isArray(range)) {
-        range = [range, range];
-      }
-      return [copyValue(range[0]), copyValue((ref = range[1]) != null ? ref : range[0])];
-    },
-    rangeIsCollapsed: function(range) {
-      var end, ref, start;
-      if (range == null) {
-        return;
-      }
-      ref = normalizeRange(range), start = ref[0], end = ref[1];
-      return rangeValuesAreEqual(start, end);
-    },
-    rangesAreEqual: function(leftRange, rightRange) {
-      var leftEnd, leftStart, ref, ref1, rightEnd, rightStart;
-      if (!((leftRange != null) && (rightRange != null))) {
-        return;
-      }
-      ref = normalizeRange(leftRange), leftStart = ref[0], leftEnd = ref[1];
-      ref1 = normalizeRange(rightRange), rightStart = ref1[0], rightEnd = ref1[1];
-      return rangeValuesAreEqual(leftStart, rightStart) && rangeValuesAreEqual(leftEnd, rightEnd);
-    }
-  });
-
-  copyValue = function(value) {
-    var index, offset;
-    if (typeof value === "number") {
-      return value;
-    } else {
-      index = value.index, offset = value.offset;
-      return {
-        index: index,
-        offset: offset
-      };
-    }
-  };
-
-  rangeValuesAreEqual = function(left, right) {
-    if (typeof left === "number") {
-      return left === right;
-    } else {
-      return left.index === right.index && left.offset === right.offset;
-    }
-  };
-
-}).call(this);
-(function() {
-  var defaults, insertStyleElementForTagName, installDefaultCSSForTagName, rewriteFunctionsAsValues;
-
-  defaults = {
-    extendsTagName: "div",
-    css: "%t { display: block; }"
-  };
-
-  Trix.registerElement = function(tagName, definition) {
-    var constructor, defaultCSS, extendedPrototype, extendsTagName, properties, prototype, ref;
-    if (definition == null) {
-      definition = {};
-    }
-    tagName = tagName.toLowerCase();
-    properties = rewriteFunctionsAsValues(definition);
-    extendsTagName = (ref = properties.extendsTagName) != null ? ref : defaults.extendsTagName;
-    delete properties.extendsTagName;
-    defaultCSS = properties.defaultCSS;
-    delete properties.defaultCSS;
-    if ((defaultCSS != null) && extendsTagName === defaults.extendsTagName) {
-      defaultCSS += "\n" + defaults.css;
-    } else {
-      defaultCSS = defaults.css;
-    }
-    installDefaultCSSForTagName(defaultCSS, tagName);
-    extendedPrototype = Object.getPrototypeOf(document.createElement(extendsTagName));
-    extendedPrototype.__super__ = extendedPrototype;
-    prototype = Object.create(extendedPrototype, properties);
-    constructor = document.registerElement(tagName, {
-      prototype: prototype
-    });
-    Object.defineProperty(prototype, "constructor", {
-      value: constructor
-    });
-    return constructor;
-  };
-
-  installDefaultCSSForTagName = function(defaultCSS, tagName) {
-    var styleElement;
-    styleElement = insertStyleElementForTagName(tagName);
-    return styleElement.textContent = defaultCSS.replace(/%t/g, tagName);
-  };
-
-  insertStyleElementForTagName = function(tagName) {
-    var element;
-    element = document.createElement("style");
-    element.setAttribute("type", "text/css");
-    element.setAttribute("data-tag-name", tagName.toLowerCase());
-    document.head.insertBefore(element, document.head.firstChild);
-    return element;
-  };
-
-  rewriteFunctionsAsValues = function(definition) {
-    var key, object, value;
-    object = {};
-    for (key in definition) {
-      value = definition[key];
-      object[key] = typeof value === "function" ? {
-        value: value
-      } : value;
-    }
-    return object;
-  };
-
-}).call(this);
-(function() {
-
-
-}).call(this);
-(function() {
   var arraysAreEqual,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
@@ -870,6 +746,125 @@ http://trix-editor.org/
     return Hash;
 
   })(Trix.Object);
+
+}).call(this);
+(function() {
+  var copyValue, normalizeRange, rangeValuesAreEqual;
+
+  Trix.extend({
+    normalizeRange: normalizeRange = function(range) {
+      var ref;
+      if (range == null) {
+        return;
+      }
+      if (!Array.isArray(range)) {
+        range = [range, range];
+      }
+      return [copyValue(range[0]), copyValue((ref = range[1]) != null ? ref : range[0])];
+    },
+    rangeIsCollapsed: function(range) {
+      var end, ref, start;
+      if (range == null) {
+        return;
+      }
+      ref = normalizeRange(range), start = ref[0], end = ref[1];
+      return rangeValuesAreEqual(start, end);
+    },
+    rangesAreEqual: function(leftRange, rightRange) {
+      var leftEnd, leftStart, ref, ref1, rightEnd, rightStart;
+      if (!((leftRange != null) && (rightRange != null))) {
+        return;
+      }
+      ref = normalizeRange(leftRange), leftStart = ref[0], leftEnd = ref[1];
+      ref1 = normalizeRange(rightRange), rightStart = ref1[0], rightEnd = ref1[1];
+      return rangeValuesAreEqual(leftStart, rightStart) && rangeValuesAreEqual(leftEnd, rightEnd);
+    }
+  });
+
+  copyValue = function(value) {
+    if (typeof value === "number") {
+      return value;
+    } else {
+      return Trix.Hash.box(value).toObject();
+    }
+  };
+
+  rangeValuesAreEqual = function(left, right) {
+    if (typeof left === "number") {
+      return left === right;
+    } else {
+      return Trix.Hash.box(left).isEqualTo(Trix.Hash.box(right));
+    }
+  };
+
+}).call(this);
+(function() {
+  var defaults, insertStyleElementForTagName, installDefaultCSSForTagName, rewriteFunctionsAsValues;
+
+  defaults = {
+    extendsTagName: "div",
+    css: "%t { display: block; }"
+  };
+
+  Trix.registerElement = function(tagName, definition) {
+    var constructor, defaultCSS, extendedPrototype, extendsTagName, properties, prototype, ref;
+    if (definition == null) {
+      definition = {};
+    }
+    tagName = tagName.toLowerCase();
+    properties = rewriteFunctionsAsValues(definition);
+    extendsTagName = (ref = properties.extendsTagName) != null ? ref : defaults.extendsTagName;
+    delete properties.extendsTagName;
+    defaultCSS = properties.defaultCSS;
+    delete properties.defaultCSS;
+    if ((defaultCSS != null) && extendsTagName === defaults.extendsTagName) {
+      defaultCSS += "\n" + defaults.css;
+    } else {
+      defaultCSS = defaults.css;
+    }
+    installDefaultCSSForTagName(defaultCSS, tagName);
+    extendedPrototype = Object.getPrototypeOf(document.createElement(extendsTagName));
+    extendedPrototype.__super__ = extendedPrototype;
+    prototype = Object.create(extendedPrototype, properties);
+    constructor = document.registerElement(tagName, {
+      prototype: prototype
+    });
+    Object.defineProperty(prototype, "constructor", {
+      value: constructor
+    });
+    return constructor;
+  };
+
+  installDefaultCSSForTagName = function(defaultCSS, tagName) {
+    var styleElement;
+    styleElement = insertStyleElementForTagName(tagName);
+    return styleElement.textContent = defaultCSS.replace(/%t/g, tagName);
+  };
+
+  insertStyleElementForTagName = function(tagName) {
+    var element;
+    element = document.createElement("style");
+    element.setAttribute("type", "text/css");
+    element.setAttribute("data-tag-name", tagName.toLowerCase());
+    document.head.insertBefore(element, document.head.firstChild);
+    return element;
+  };
+
+  rewriteFunctionsAsValues = function(definition) {
+    var key, object, value;
+    object = {};
+    for (key in definition) {
+      value = definition[key];
+      object[key] = typeof value === "function" ? {
+        value: value
+      } : value;
+    }
+    return object;
+  };
+
+}).call(this);
+(function() {
+
 
 }).call(this);
 (function() {
@@ -2131,17 +2126,19 @@ http://trix-editor.org/
     };
 
     InputController.prototype.elementDidMutate = function(mutationSummary) {
-      return this.handleInput(function() {
-        var ref;
-        if (!this.mutationIsExpected(mutationSummary)) {
-          if ((ref = this.responder) != null) {
-            ref.replaceHTML(this.element.innerHTML);
+      if (!this.inputSummary.composing) {
+        return this.handleInput(function() {
+          var ref;
+          if (!this.mutationIsExpected(mutationSummary)) {
+            if ((ref = this.responder) != null) {
+              ref.replaceHTML(this.element.innerHTML);
+            }
           }
-        }
-        this.resetInputSummary();
-        this.requestRender();
-        return Trix.selectionChangeObserver.reset();
-      });
+          this.resetInputSummary();
+          this.requestRender();
+          return Trix.selectionChangeObserver.reset();
+        });
+      }
     };
 
     InputController.prototype.mutationIsExpected = function(mutationSummary) {
@@ -2189,7 +2186,7 @@ http://trix-editor.org/
 
     InputController.prototype.events = {
       keydown: function(event) {
-        var character, context, i, keyModifier, keyName, keys, len, modifier, ref, ref1;
+        var character, context, i, keyName, keys, len, modifier, ref, ref1;
         if (!this.inputSummary.composing) {
           this.resetInputSummary();
         }
@@ -2204,16 +2201,11 @@ http://trix-editor.org/
             if (modifier === "ctrl") {
               modifier = "control";
             }
-            context = this.keys[modifier];
-            if (context[keyName]) {
-              keyModifier = modifier;
-              break;
-            }
+            context = context != null ? context[modifier] : void 0;
           }
-          if (context[keyName] != null) {
+          if ((context != null ? context[keyName] : void 0) != null) {
             this.setInputSummary({
-              keyName: keyName,
-              keyModifier: keyModifier
+              keyName: keyName
             });
             Trix.selectionChangeObserver.reset();
             context[keyName].call(this, event);
@@ -2286,7 +2278,10 @@ http://trix-editor.org/
         var draggingPoint, ref, ref1;
         if (this.draggedRange || this.canAcceptDataTransfer(event.dataTransfer)) {
           event.preventDefault();
-          draggingPoint = [event.clientX, event.clientY];
+          draggingPoint = {
+            x: event.clientX,
+            y: event.clientY
+          };
           if (draggingPoint.toString() !== ((ref = this.draggingPoint) != null ? ref.toString() : void 0)) {
             this.draggingPoint = draggingPoint;
             return (ref1 = this.delegate) != null ? typeof ref1.inputControllerDidReceiveDragOverPoint === "function" ? ref1.inputControllerDidReceiveDragOverPoint(this.draggingPoint) : void 0 : void 0;
@@ -2307,9 +2302,12 @@ http://trix-editor.org/
         var document, documentJSON, files, point, ref, ref1, ref2, ref3, ref4;
         event.preventDefault();
         files = (ref = event.dataTransfer) != null ? ref.files : void 0;
-        point = [event.clientX, event.clientY];
+        point = {
+          x: event.clientX,
+          y: event.clientY
+        };
         if ((ref1 = this.responder) != null) {
-          ref1.setLocationRangeFromPoint(point);
+          ref1.setLocationRangeFromPointRange(point);
         }
         if (files != null ? files.length : void 0) {
           this.attachFiles(files);
@@ -2427,11 +2425,13 @@ http://trix-editor.org/
       compositionstart: function(event) {
         var ref, textAdded;
         if (!this.selectionIsExpanded()) {
-          textAdded = (ref = this.responder) != null ? ref.insertPlaceholder() : void 0;
-          this.setInputSummary({
-            textAdded: textAdded
-          });
-          this.requestRender();
+          if (!(this.inputSummary.eventName === "keypress" && this.inputSummary.textAdded)) {
+            textAdded = (ref = this.responder) != null ? ref.insertPlaceholder() : void 0;
+            this.setInputSummary({
+              textAdded: textAdded
+            });
+            this.requestRender();
+          }
         }
         return this.setInputSummary({
           composing: true,
@@ -2468,6 +2468,7 @@ http://trix-editor.org/
           }
           ref4 = summarizeStringChange(compositionStart, data), added = ref4.added, removed = ref4.removed;
           return this.setInputSummary({
+            composing: false,
             textAdded: added,
             didDelete: Boolean(removed)
           });
@@ -4938,7 +4939,7 @@ http://trix-editor.org/
   arraysAreEqual = Trix.arraysAreEqual, normalizeSpaces = Trix.normalizeSpaces, makeElement = Trix.makeElement, tagName = Trix.tagName, walkTree = Trix.walkTree, findClosestElementFromNode = Trix.findClosestElementFromNode, elementContainsNode = Trix.elementContainsNode, nodeIsAttachmentWrapper = Trix.nodeIsAttachmentWrapper, extend = Trix.extend;
 
   Trix.HTMLParser = (function(superClass) {
-    var allowedAttributes, blockForAttachment, blockForAttributes, getAttachmentAttributes, getBlockAttributes, getBlockElementMargin, getImageDimensions, getTextAttributes, nodeFilter, pieceForString, removeInsignificantWhitespace, sanitizeHTML;
+    var allowedAttributes, blockForAttachment, blockForAttributes, getAttachmentAttributes, getBlockElementMargin, getImageDimensions, nodeFilter, pieceForString, removeInsignificantWhitespace, sanitizeHTML;
 
     extend1(HTMLParser, superClass);
 
@@ -4951,8 +4952,9 @@ http://trix-editor.org/
       return parser;
     };
 
-    function HTMLParser(html1) {
+    function HTMLParser(html1, arg) {
       this.html = html1;
+      this.referenceElement = (arg != null ? arg : {}).referenceElement;
       this.blocks = [];
       this.blockElements = [];
       this.processedElements = [];
@@ -4967,8 +4969,8 @@ http://trix-editor.org/
       try {
         this.createHiddenContainer();
         html = sanitizeHTML(this.html);
-        this.container.innerHTML = html;
-        walker = walkTree(this.container, {
+        this.containerElement.innerHTML = html;
+        walker = walkTree(this.containerElement, {
           usingFilter: nodeFilter
         });
         while (walker.nextNode()) {
@@ -4989,17 +4991,25 @@ http://trix-editor.org/
     };
 
     HTMLParser.prototype.createHiddenContainer = function() {
-      this.container = makeElement({
-        tagName: "div",
-        style: {
-          display: "none"
-        }
-      });
-      return document.body.appendChild(this.container);
+      if (this.referenceElement) {
+        this.containerElement = this.referenceElement.cloneNode(false);
+        this.containerElement.removeAttribute("id");
+        this.containerElement.setAttribute("data-trix-internal", "");
+        this.containerElement.style.display = "none";
+        return this.referenceElement.parentNode.insertBefore(this.containerElement, this.referenceElement.nextSibling);
+      } else {
+        this.containerElement = makeElement({
+          tagName: "div",
+          style: {
+            display: "none"
+          }
+        });
+        return document.body.appendChild(this.containerElement);
+      }
     };
 
     HTMLParser.prototype.removeHiddenContainer = function() {
-      return document.body.removeChild(this.container);
+      return this.containerElement.parentNode.removeChild(this.containerElement);
     };
 
     HTMLParser.prototype.processNode = function(node) {
@@ -5017,7 +5027,7 @@ http://trix-editor.org/
     HTMLParser.prototype.appendBlockForElement = function(element) {
       var attributes, parentBlockElement;
       if (this.isBlockElement(element) && !this.isBlockElement(element.firstChild)) {
-        attributes = getBlockAttributes(element);
+        attributes = this.getBlockAttributes(element);
         if (!(elementContainsNode(this.currentBlockElement, element) && arraysAreEqual(attributes, this.currentBlock.attributes))) {
           this.currentBlock = this.appendBlockForAttributesWithElement(attributes, element);
           return this.currentBlockElement = element;
@@ -5035,7 +5045,7 @@ http://trix-editor.org/
     HTMLParser.prototype.findParentBlockElement = function(element) {
       var parentElement;
       parentElement = element.parentElement;
-      while (parentElement) {
+      while (parentElement && parentElement !== this.containerElement) {
         if (this.isBlockElement(parentElement) && indexOf.call(this.blockElements, parentElement) >= 0) {
           return parentElement;
         } else {
@@ -5079,7 +5089,7 @@ http://trix-editor.org/
     HTMLParser.prototype.processTextNode = function(node) {
       var string;
       if (string = normalizeSpaces(node.data)) {
-        return this.appendStringWithAttributes(string, getTextAttributes(node.parentNode));
+        return this.appendStringWithAttributes(string, this.getTextAttributes(node.parentNode));
       }
     };
 
@@ -5093,8 +5103,8 @@ http://trix-editor.org/
       } else {
         switch (tagName(element)) {
           case "br":
-            if (!(this.isExtraBR(element) || this.isBlockElement(element.nextElementSibling))) {
-              this.appendStringWithAttributes("\n", getTextAttributes(element));
+            if (!(this.isExtraBR(element) || this.isBlockElement(element.nextSibling))) {
+              this.appendStringWithAttributes("\n", this.getTextAttributes(element));
             }
             return this.processedElements.push(element);
           case "tr":
@@ -5163,6 +5173,57 @@ http://trix-editor.org/
       }
     };
 
+    HTMLParser.prototype.getTextAttributes = function(element) {
+      var attribute, attributes, config, json, key, ref, ref1, value;
+      attributes = {};
+      ref = Trix.config.textAttributes;
+      for (attribute in ref) {
+        config = ref[attribute];
+        if (config.parser) {
+          if (value = config.parser(element)) {
+            attributes[attribute] = value;
+          }
+        } else if (config.tagName) {
+          if (tagName(element) === config.tagName) {
+            attributes[attribute] = true;
+          }
+        }
+      }
+      if (nodeIsAttachmentWrapper(element)) {
+        if (json = element.firstElementChild.dataset.trixAttributes) {
+          ref1 = JSON.parse(json);
+          for (key in ref1) {
+            value = ref1[key];
+            attributes[key] = value;
+          }
+        }
+      }
+      return attributes;
+    };
+
+    HTMLParser.prototype.getBlockAttributes = function(element) {
+      var attribute, attributes, config, ref;
+      attributes = [];
+      while (element && element !== this.containerElement) {
+        ref = Trix.config.blockAttributes;
+        for (attribute in ref) {
+          config = ref[attribute];
+          if (config.parse !== false) {
+            if (tagName(element) === config.tagName) {
+              if ((typeof config.test === "function" ? config.test(element) : void 0) || !config.test) {
+                attributes.push(attribute);
+                if (config.listAttribute) {
+                  attributes.push(config.listAttribute);
+                }
+              }
+            }
+          }
+        }
+        element = element.parentNode;
+      }
+      return attributes.reverse();
+    };
+
     HTMLParser.prototype.getMarginOfBlockElementAtIndex = function(index) {
       var element, ref;
       if (element = this.blockElements[index]) {
@@ -5175,7 +5236,7 @@ http://trix-editor.org/
     HTMLParser.prototype.getMarginOfDefaultBlockElement = function() {
       var element;
       element = makeElement(Trix.config.blockAttributes["default"].tagName);
-      this.container.appendChild(element);
+      this.containerElement.appendChild(element);
       return getBlockElementMargin(element);
     };
 
@@ -5237,50 +5298,6 @@ http://trix-editor.org/
         attributes: attributes,
         attachment: attachment
       };
-    };
-
-    getTextAttributes = function(element) {
-      var attribute, attributes, config, ref, value;
-      attributes = {};
-      ref = Trix.config.textAttributes;
-      for (attribute in ref) {
-        config = ref[attribute];
-        if (config.parser) {
-          if (value = config.parser(element)) {
-            attributes[attribute] = value;
-          }
-        } else if (config.tagName) {
-          if (tagName(element) === config.tagName) {
-            attributes[attribute] = true;
-          }
-        }
-      }
-      return attributes;
-    };
-
-    getBlockAttributes = function(element) {
-      var attribute, attributes, config, ref;
-      attributes = [];
-      while (element) {
-        ref = Trix.config.blockAttributes;
-        for (attribute in ref) {
-          config = ref[attribute];
-          if (config.parse !== false) {
-            if (tagName(element) === config.tagName) {
-              if (!config.className || element.classList.contains(config.className)) {
-                if (!config.test || config.test(element)) {
-                  attributes.push(attribute);
-                  if (config.listAttribute) {
-                    attributes.push(config.listAttribute);
-                  }
-                }
-              }
-            }
-          }
-        }
-        element = element.parentNode;
-      }
-      return attributes.reverse();
     };
 
     getAttachmentAttributes = function(element) {
@@ -5400,8 +5417,8 @@ http://trix-editor.org/
       return new this(blocks);
     };
 
-    Document.fromHTML = function(html) {
-      return Trix.HTMLParser.parse(html).getDocument();
+    Document.fromHTML = function(html, options) {
+      return Trix.HTMLParser.parse(html, options).getDocument();
     };
 
     Document.fromString = function(string, textAttributes) {
@@ -6319,13 +6336,11 @@ http://trix-editor.org/
     };
 
     Composition.prototype.replaceHTML = function(html) {
-      var document;
+      var document, pointRange;
       document = Trix.Document.fromHTML(html).copyUsingObjectsFromDocument(this.document);
-      return this.preserveSelection((function(_this) {
-        return function() {
-          return _this.setDocument(document);
-        };
-      })(this));
+      pointRange = this.getSelectedPointRange();
+      this.setDocument(document);
+      return this.setSelectionPointRange(pointRange);
     };
 
     Composition.prototype.insertFile = function(file) {
@@ -6607,9 +6622,9 @@ http://trix-editor.org/
       return this.hasCurrentAttribute("frozen");
     };
 
-    Composition.proxyMethod("getSelectionManager().setLocationRangeFromPoint");
+    Composition.proxyMethod("getSelectionManager().getSelectedPointRange");
 
-    Composition.proxyMethod("getSelectionManager().preserveSelection");
+    Composition.proxyMethod("getSelectionManager().setLocationRangeFromPointRange");
 
     Composition.proxyMethod("getSelectionManager().locationIsCursorTarget");
 
@@ -6620,7 +6635,16 @@ http://trix-editor.org/
     Composition.prototype.setSelection = function(selectedRange) {
       var locationRange, ref;
       locationRange = this.document.locationRangeFromRange(selectedRange);
-      return (ref = this.delegate) != null ? typeof ref.compositionDidRequestChangingSelectionToLocationRange === "function" ? ref.compositionDidRequestChangingSelectionToLocationRange(locationRange) : void 0 : void 0;
+      return (ref = this.delegate) != null ? ref.compositionDidRequestChangingSelection({
+        locationRange: locationRange
+      }) : void 0;
+    };
+
+    Composition.prototype.setSelectionPointRange = function(pointRange) {
+      var ref;
+      return (ref = this.delegate) != null ? ref.compositionDidRequestChangingSelection({
+        pointRange: pointRange
+      }) : void 0;
     };
 
     Composition.prototype.getSelectedRange = function() {
@@ -6923,9 +6947,10 @@ http://trix-editor.org/
 }).call(this);
 (function() {
   Trix.Editor = (function() {
-    function Editor(composition, selectionManager) {
+    function Editor(composition, selectionManager, element) {
       this.composition = composition;
       this.selectionManager = selectionManager;
+      this.element = element;
       this.undoManager = new Trix.UndoManager(this.composition);
     }
 
@@ -6940,7 +6965,9 @@ http://trix-editor.org/
       if (html == null) {
         html = "";
       }
-      return this.loadDocument(Trix.Document.fromHTML(html));
+      return this.loadDocument(Trix.Document.fromHTML(html, {
+        referenceElement: this.element
+      }));
     };
 
     Editor.prototype.loadJSON = function(arg) {
@@ -7834,16 +7861,16 @@ http://trix-editor.org/
 
 }).call(this);
 (function() {
-  var defer, elementContainsNode, handleEvent, handleEventOnce, innerElementIsActive, nodeIsCursorTarget, normalizeRange, rangeIsCollapsed, rangesAreEqual,
+  var defer, elementContainsNode, handleEvent, handleEventOnce, innerElementIsActive, makeElement, nodeIsCursorTarget, normalizeRange, rangeIsCollapsed, rangesAreEqual,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty,
     slice = [].slice;
 
-  defer = Trix.defer, elementContainsNode = Trix.elementContainsNode, nodeIsCursorTarget = Trix.nodeIsCursorTarget, innerElementIsActive = Trix.innerElementIsActive, handleEvent = Trix.handleEvent, handleEventOnce = Trix.handleEventOnce, normalizeRange = Trix.normalizeRange, rangeIsCollapsed = Trix.rangeIsCollapsed, rangesAreEqual = Trix.rangesAreEqual;
+  defer = Trix.defer, elementContainsNode = Trix.elementContainsNode, nodeIsCursorTarget = Trix.nodeIsCursorTarget, innerElementIsActive = Trix.innerElementIsActive, makeElement = Trix.makeElement, handleEvent = Trix.handleEvent, handleEventOnce = Trix.handleEventOnce, normalizeRange = Trix.normalizeRange, rangeIsCollapsed = Trix.rangeIsCollapsed, rangesAreEqual = Trix.rangesAreEqual;
 
   Trix.SelectionManager = (function(superClass) {
-    var getClientRects, getDOMRange, getDOMSelection, setDOMRange;
+    var cursorPositionPlaceholder, getClientRects, getCollapsedPointRange, getDOMRange, getDOMSelection, getExpandedPointRange, setDOMRange;
 
     extend(SelectionManager, superClass);
 
@@ -7879,11 +7906,17 @@ http://trix-editor.org/
       }
     };
 
-    SelectionManager.prototype.setLocationRangeFromPoint = function(point) {
-      var locationRange;
-      if (locationRange = this.getLocationRangeAtPoint(point)) {
-        return this.setLocationRange(locationRange);
-      }
+    SelectionManager.prototype.getSelectedPointRange = function() {
+      var ref;
+      return (ref = getExpandedPointRange()) != null ? ref : getCollapsedPointRange();
+    };
+
+    SelectionManager.prototype.setLocationRangeFromPointRange = function(pointRange) {
+      var endLocation, ref, ref1, startLocation;
+      pointRange = normalizeRange(pointRange);
+      startLocation = (ref = this.getLocationRangeAtPoint(pointRange[0])) != null ? ref[0] : void 0;
+      endLocation = (ref1 = this.getLocationRangeAtPoint(pointRange[1])) != null ? ref1[0] : void 0;
+      return this.setLocationRange([startLocation, endLocation]);
     };
 
     SelectionManager.prototype.getClientRectAtLocationRange = function(locationRange) {
@@ -7915,28 +7948,6 @@ http://trix-editor.org/
         if (lockedLocationRange != null) {
           return this.setLocationRange(lockedLocationRange);
         }
-      }
-    };
-
-    SelectionManager.prototype.preserveSelection = function(block) {
-      var end, endPoints, locationRange, start;
-      endPoints = this.getSelectionEndPoints();
-      locationRange = this.getLocationRange();
-      block();
-      if (endPoints) {
-        start = this.getLocationRangeAtPoint(endPoints[0]);
-        end = this.getLocationRangeAtPoint(endPoints[1]);
-        if ((start != null) && (end == null)) {
-          end = start;
-        } else if ((end != null) && (start == null)) {
-          start = end;
-        }
-        if ((start != null) && (end != null)) {
-          locationRange = normalizeRange([start, end]);
-        }
-      }
-      if (locationRange) {
-        return this.setLocationRange(locationRange);
       }
     };
 
@@ -8049,36 +8060,75 @@ http://trix-editor.org/
     };
 
     SelectionManager.prototype.getLocationRangeAtPoint = function(arg) {
-      var clientX, clientY, domRange, offset, offsetNode, ref;
-      clientX = arg[0], clientY = arg[1];
+      var domRange, offset, offsetNode, originalDOMRange, ref, textRange, x, y;
+      x = arg.x, y = arg.y;
       if (document.caretPositionFromPoint) {
-        ref = document.caretPositionFromPoint(clientX, clientY), offsetNode = ref.offsetNode, offset = ref.offset;
+        ref = document.caretPositionFromPoint(x, y), offsetNode = ref.offsetNode, offset = ref.offset;
         domRange = document.createRange();
         domRange.setStart(offsetNode, offset);
       } else if (document.caretRangeFromPoint) {
-        domRange = document.caretRangeFromPoint(clientX, clientY);
+        domRange = document.caretRangeFromPoint(x, y);
       } else if (document.body.createTextRange) {
+        originalDOMRange = getDOMRange();
         try {
-          domRange = document.body.createTextRange();
-          domRange.moveToPoint(clientX, clientY);
-          domRange.select();
+          textRange = document.body.createTextRange();
+          textRange.moveToPoint(x, y);
+          textRange.select();
         } catch (_error) {}
+        domRange = getDOMRange();
+        setDOMRange(originalDOMRange);
       }
-      return this.createLocationRangeFromDOMRange(domRange != null ? domRange : getDOMRange());
+      return this.createLocationRangeFromDOMRange(domRange);
     };
 
-    SelectionManager.prototype.getSelectionEndPoints = function() {
-      var domRange, leftPoint, leftRect, rects, rightPoint, rightRect;
+    cursorPositionPlaceholder = makeElement({
+      tagName: "span",
+      style: {
+        marginLeft: "-0.01em"
+      },
+      data: {
+        trixMutable: true,
+        trixSerialize: false
+      }
+    });
+
+    getCollapsedPointRange = function() {
+      var domRange, node, rect, start;
+      if (!(domRange = getDOMRange())) {
+        return;
+      }
+      node = cursorPositionPlaceholder.cloneNode(true);
+      try {
+        domRange.insertNode(node);
+        rect = node.getBoundingClientRect();
+      } finally {
+        node.parentNode.removeChild(node);
+      }
+      start = {
+        x: rect.left,
+        y: rect.top + 1
+      };
+      return normalizeRange(start);
+    };
+
+    getExpandedPointRange = function() {
+      var domRange, end, endRect, rects, start, startRect;
       if (!(domRange = getDOMRange())) {
         return;
       }
       rects = domRange.getClientRects();
       if (rects.length > 0) {
-        leftRect = rects[0];
-        rightRect = rects[rects.length - 1];
-        leftPoint = [leftRect.left, leftRect.top + leftRect.height / 2];
-        rightPoint = [rightRect.right, rightRect.top + rightRect.height / 2];
-        return [leftPoint, rightPoint];
+        startRect = rects[0];
+        endRect = rects[rects.length - 1];
+        start = {
+          x: startRect.left,
+          y: startRect.top + 1
+        };
+        end = {
+          x: endRect.right,
+          y: endRect.top + 1
+        };
+        return normalizeRange(start, end);
       }
     };
 
@@ -8143,7 +8193,7 @@ http://trix-editor.org/
       this.compositionController.delegate = this;
       this.toolbarController = new Trix.ToolbarController(this.editorElement.toolbarElement);
       this.toolbarController.delegate = this;
-      this.editor = new Trix.Editor(this.composition, this.selectionManager);
+      this.editor = new Trix.Editor(this.composition, this.selectionManager, this.editorElement);
       if (document != null) {
         this.editor.loadDocument(document);
       } else {
@@ -8199,9 +8249,10 @@ http://trix-editor.org/
       var managedAttachment;
       this.compositionController.rerenderViewForObject(attachment);
       managedAttachment = this.attachmentManager.manageAttachment(attachment);
-      return this.editorElement.notify("attachment-edit", {
+      this.editorElement.notify("attachment-edit", {
         attachment: managedAttachment
       });
+      return this.editorElement.notify("change");
     };
 
     EditorController.prototype.compositionDidRemoveAttachment = function(attachment) {
@@ -8226,12 +8277,12 @@ http://trix-editor.org/
       return this.attachmentLocationRange = null;
     };
 
-    EditorController.prototype.compositionDidRequestChangingSelectionToLocationRange = function(locationRange) {
+    EditorController.prototype.compositionDidRequestChangingSelection = function(requestedSelection) {
       if (this.loadingSnapshot && !this.isFocused()) {
         return;
       }
-      this.requestedLocationRange = locationRange;
-      this.documentWhenLocationRangeRequested = this.composition.document;
+      this.requestedSelection = requestedSelection;
+      this.documentWhenSelectionRequested = this.composition.document;
       if (!this.handlingInput) {
         return this.render();
       }
@@ -8273,13 +8324,19 @@ http://trix-editor.org/
     };
 
     EditorController.prototype.compositionControllerDidRender = function() {
-      if (this.requestedLocationRange != null) {
-        if (this.documentWhenLocationRangeRequested.isEqualTo(this.composition.document)) {
-          this.selectionManager.setLocationRange(this.requestedLocationRange);
+      var locationRange, pointRange, ref;
+      if (this.requestedSelection != null) {
+        if (this.documentWhenSelectionRequested.isEqualTo(this.composition.document)) {
+          ref = this.requestedSelection, locationRange = ref.locationRange, pointRange = ref.pointRange;
+          if (locationRange) {
+            this.selectionManager.setLocationRange(locationRange);
+          } else if (pointRange) {
+            this.selectionManager.setLocationRangeFromPointRange(pointRange);
+          }
         }
         this.composition.updateCurrentAttributes();
-        this.requestedLocationRange = null;
-        this.documentWhenLocationRangeRequested = null;
+        this.requestedSelection = null;
+        this.documentWhenSelectionRequested = null;
       }
       return this.editorElement.notify("render");
     };
@@ -8372,7 +8429,7 @@ http://trix-editor.org/
     };
 
     EditorController.prototype.inputControllerDidReceiveDragOverPoint = function(point) {
-      return this.selectionManager.setLocationRangeFromPoint(point);
+      return this.selectionManager.setLocationRangeFromPointRange(point);
     };
 
     EditorController.prototype.inputControllerDidCancelDrag = function() {
@@ -8742,20 +8799,22 @@ http://trix-editor.org/
         return makeEditable(this);
       },
       attachedCallback: function() {
-        autofocus(this);
-        if (this.editorController == null) {
-          this.editorController = new Trix.EditorController({
-            editorElement: this,
-            html: this.defaultValue = this.value
-          });
+        if (!this.hasAttribute("data-trix-internal")) {
+          autofocus(this);
+          if (this.editorController == null) {
+            this.editorController = new Trix.EditorController({
+              editorElement: this,
+              html: this.defaultValue = this.value
+            });
+          }
+          this.editorController.registerSelectionManager();
+          this.registerResetListener();
+          return requestAnimationFrame((function(_this) {
+            return function() {
+              return _this.notify("initialize");
+            };
+          })(this));
         }
-        this.editorController.registerSelectionManager();
-        this.registerResetListener();
-        return requestAnimationFrame((function(_this) {
-          return function() {
-            return _this.notify("initialize");
-          };
-        })(this));
       },
       detachedCallback: function() {
         var ref;
