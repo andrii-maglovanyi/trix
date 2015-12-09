@@ -39,7 +39,7 @@ class Trix.BlockView extends Trix.ObjectView
     else
       Trix.AttachmentView
 
-    view = @createChildView(constructor, attachment)
+    view = @findOrCreateCachedChildView(constructor, attachment)
     view.getNodes()
 
   createContainerElement: (depth) ->
