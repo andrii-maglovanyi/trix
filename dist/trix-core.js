@@ -1323,18 +1323,21 @@ http://trix-editor.org/
       }
     },
     heading1: {
+      heading: true,
       tagName: "h1",
       test: function(element) {
         return Trix.tagName(element) === "h1";
       }
     },
     heading2: {
+      heading: true,
       tagName: "h2",
       test: function(element) {
         return Trix.tagName(element) === "h2";
       }
     },
     heading3: {
+      heading: true,
       tagName: "h3",
       test: function(element) {
         return Trix.tagName(element) === "h3";
@@ -4673,6 +4676,10 @@ http://trix-editor.org/
       }
     };
 
+    Block.prototype.isHeading = function() {
+      return this.getConfig("heading") != null;
+    };
+
     Block.prototype.isListItem = function() {
       return this.getConfig("listAttribute") != null;
     };
@@ -6259,7 +6266,13 @@ http://trix-editor.org/
       endLocation = this.document.locationFromPosition(endPosition);
       block = this.document.getBlockAtIndex(endLocation.index);
       if (block.hasAttributes()) {
-        if (block.isListItem()) {
+        if (block.isHeading() && endLocation.offset === block.getBlockBreakPosition()) {
+          if (block.isEmpty()) {
+            return this.removeLastBlockAttribute();
+          } else {
+            return this.insertBlock();
+          }
+        } else if (block.isListItem()) {
           if (block.isEmpty()) {
             this.decreaseListLevel();
             return this.setSelection(startPosition);

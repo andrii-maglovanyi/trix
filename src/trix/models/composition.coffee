@@ -97,7 +97,12 @@ class Trix.Composition extends Trix.BasicObject
     block = @document.getBlockAtIndex(endLocation.index)
 
     if block.hasAttributes()
-      if block.isListItem()
+      if block.isHeading() and endLocation.offset is block.getBlockBreakPosition()
+        if block.isEmpty()
+          @removeLastBlockAttribute()
+        else
+          @insertBlock()
+      else if block.isListItem()
         if block.isEmpty()
           @decreaseListLevel()
           @setSelection(startPosition)

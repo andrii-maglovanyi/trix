@@ -26,14 +26,17 @@ Trix.config.blockAttributes = attributes =
     test: (element) ->
       Trix.tagName(element.parentNode) is attributes[@listAttribute].tagName
   heading1:
+    heading: true
     tagName: "h1"
     test: (element) ->
       Trix.tagName(element) is "h1"
   heading2:
+    heading: true
     tagName: "h2"
     test: (element) ->
       Trix.tagName(element) is "h2"
   heading3:
+    heading: true
     tagName: "h3"
     test: (element) ->
       Trix.tagName(element) is "h3"
