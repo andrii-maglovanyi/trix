@@ -56,12 +56,14 @@ class Trix.InputController extends Trix.BasicObject
   # Mutation observer delegate
 
   elementDidMutate: (mutationSummary) ->
-    @handleInput ->
-      unless @mutationIsExpected(mutationSummary)
-        @responder?.replaceHTML(@element.innerHTML)
-      @resetInputSummary()
-      @requestRender()
-      Trix.selectionChangeObserver.reset()
+    unless @inputSummary.composing
+      @handleInput ->
+        unless @mutationIsExpected(mutationSummary)
+          @responder?.replaceHTML(@element.innerHTML)
+
+        @resetInputSummary()
+        @requestRender()
+        Trix.selectionChangeObserver.reset()
 
   mutationIsExpected: (mutationSummary) ->
     if @inputSummary
@@ -90,15 +92,13 @@ class Trix.InputController extends Trix.BasicObject
 
       if keyName = @constructor.keyNames[event.keyCode]
         context = @keys
+
         for modifier in ["ctrl", "alt", "shift", "meta"] when event["#{modifier}Key"]
           modifier = "control" if modifier is "ctrl"
-          context = @keys[modifier]
-          if context[keyName]
-            keyModifier = modifier
-            break
+          context = context?[modifier]
 
-        if context[keyName]?
-          @setInputSummary({keyName, keyModifier})
+        if context?[keyName]?
+          @setInputSummary({keyName})
           Trix.selectionChangeObserver.reset()
           context[keyName].call(this, event)
 
@@ -137,7 +137,7 @@ class Trix.InputController extends Trix.BasicObject
     dragover: (event) ->
       if @draggedRange or @canAcceptDataTransfer(event.dataTransfer)
         event.preventDefault()
-        draggingPoint = [event.clientX, event.clientY]
+        draggingPoint = x: event.clientX, y: event.clientY
         if draggingPoint.toString() isnt @draggingPoint?.toString()
           @draggingPoint = draggingPoint
           @delegate?.inputControllerDidReceiveDragOverPoint?(@draggingPoint)
@@ -151,8 +151,8 @@ class Trix.InputController extends Trix.BasicObject
       event.preventDefault()
       files = event.dataTransfer?.files
 
-      point = [event.clientX, event.clientY]
-      @responder?.setLocationRangeFromPoint(point)
+      point = x: event.clientX, y: event.clientY
+      @responder?.setLocationRangeFromPointRange(point)
 
       if files?.length
         @attachFiles(files)
@@ -226,9 +226,11 @@ class Trix.InputController extends Trix.BasicObject
 
     compositionstart: (event) ->
       unless @selectionIsExpanded()
-        textAdded = @responder?.insertPlaceholder()
-        @setInputSummary({textAdded})
-        @requestRender()
+        # Skip placeholder if keypress input was received before the composition started
+        unless @inputSummary.eventName is "keypress" and @inputSummary.textAdded
+          textAdded = @responder?.insertPlaceholder()
+          @setInputSummary({textAdded})
+          @requestRender()
 
       @setInputSummary(composing: true, compositionStart: event.data)
 
@@ -249,7 +251,7 @@ class Trix.InputController extends Trix.BasicObject
         @delegate?.inputControllerWillPerformTyping()
         @responder?.insertString(data)
         {added, removed} = summarizeStringChange(compositionStart, data)
-        @setInputSummary(textAdded: added, didDelete: Boolean(removed))
+        @setInputSummary(composing: false, textAdded: added, didDelete: Boolean(removed))
 
     input: (event) ->
       event.stopPropagation()

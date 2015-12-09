@@ -30,7 +30,7 @@ class Trix.EditorController extends Trix.Controller
     @toolbarController = new Trix.ToolbarController @editorElement.toolbarElement
     @toolbarController.delegate = this
 
-    @editor = new Trix.Editor @composition, @selectionManager
+    @editor = new Trix.Editor @composition, @selectionManager, @editorElement
     if document?
       @editor.loadDocument(document)
     else
@@ -67,6 +67,7 @@ class Trix.EditorController extends Trix.Controller
     @compositionController.rerenderViewForObject(attachment)
     managedAttachment = @attachmentManager.manageAttachment(attachment)
     @editorElement.notify("attachment-edit", attachment: managedAttachment)
+    @editorElement.notify("change")
 
   compositionDidRemoveAttachment: (attachment) ->
     managedAttachment = @attachmentManager.unmanageAttachment(attachment)
@@ -83,10 +84,10 @@ class Trix.EditorController extends Trix.Controller
     @compositionController.uninstallAttachmentEditor()
     @attachmentLocationRange = null
 
-  compositionDidRequestChangingSelectionToLocationRange: (locationRange) ->
+  compositionDidRequestChangingSelection: (requestedSelection) ->
     return if @loadingSnapshot and not @isFocused()
-    @requestedLocationRange = locationRange
-    @documentWhenLocationRangeRequested = @composition.document
+    @requestedSelection = requestedSelection
+    @documentWhenSelectionRequested = @composition.document
     @render() unless @handlingInput
 
   compositionWillLoadSnapshot: ->
@@ -122,12 +123,17 @@ class Trix.EditorController extends Trix.Controller
     @editorElement.notify("sync")
 
   compositionControllerDidRender: ->
-    if @requestedLocationRange?
-      if @documentWhenLocationRangeRequested.isEqualTo(@composition.document)
-        @selectionManager.setLocationRange(@requestedLocationRange)
+    if @requestedSelection?
+      if @documentWhenSelectionRequested.isEqualTo(@composition.document)
+        {locationRange, pointRange} = @requestedSelection
+        if locationRange
+          @selectionManager.setLocationRange(locationRange)
+        else if pointRange
+          @selectionManager.setLocationRangeFromPointRange(pointRange)
+
       @composition.updateCurrentAttributes()
-      @requestedLocationRange = null
-      @documentWhenLocationRangeRequested = null
+      @requestedSelection = null
+      @documentWhenSelectionRequested = null
     @editorElement.notify("render")
 
   compositionControllerDidFocus: ->
@@ -195,7 +201,7 @@ class Trix.EditorController extends Trix.Controller
     @locationRangeBeforeDrag = @selectionManager.getLocationRange()
 
   inputControllerDidReceiveDragOverPoint: (point) ->
-    @selectionManager.setLocationRangeFromPoint(point)
+    @selectionManager.setLocationRangeFromPointRange(point)
 
   inputControllerDidCancelDrag: ->
     @selectionManager.setLocationRange(@locationRangeBeforeDrag)
