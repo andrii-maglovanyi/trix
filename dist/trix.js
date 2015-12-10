@@ -2521,6 +2521,7 @@ window.CustomElements.addModule(function(scope) {
     bullet: {
       tagName: "li",
       listAttribute: "bulletList",
+      excludesAttributes: ["heading1", "heading2", "heading3"],
       test: function(element) {
         return Trix.tagName(element.parentNode) === attributes[this.listAttribute].tagName;
       }
@@ -2532,6 +2533,7 @@ window.CustomElements.addModule(function(scope) {
     number: {
       tagName: "li",
       listAttribute: "numberList",
+      excludesAttributes: ["heading1", "heading2", "heading3"],
       test: function(element) {
         return Trix.tagName(element.parentNode) === attributes[this.listAttribute].tagName;
       }
@@ -2539,6 +2541,7 @@ window.CustomElements.addModule(function(scope) {
     heading1: {
       heading: true,
       tagName: "h1",
+      excludesAttributes: ["bulletList", "bullet", "numberList", "number"],
       test: function(element) {
         return Trix.tagName(element) === "h1";
       }
@@ -2546,6 +2549,7 @@ window.CustomElements.addModule(function(scope) {
     heading2: {
       heading: true,
       tagName: "h2",
+      excludesAttributes: ["bulletList", "bullet", "numberList", "number"],
       test: function(element) {
         return Trix.tagName(element) === "h2";
       }
@@ -2553,6 +2557,7 @@ window.CustomElements.addModule(function(scope) {
     heading3: {
       heading: true,
       tagName: "h3",
+      excludesAttributes: ["bulletList", "bullet", "numberList", "number"],
       test: function(element) {
         return Trix.tagName(element) === "h3";
       }
@@ -4515,7 +4520,7 @@ window.CustomElements.addModule(function(scope) {
       var attachment, constructor, view;
       attachment = this.block.getAttachment();
       constructor = attachment.isPreviewable() ? Trix.PreviewableAttachmentView : Trix.AttachmentView;
-      view = this.createChildView(constructor, attachment);
+      view = this.findOrCreateCachedChildView(constructor, attachment);
       return view.getNodes();
     };
 
@@ -6909,15 +6914,23 @@ window.CustomElements.addModule(function(scope) {
     };
 
     Document.prototype.applyBlockAttributeAtRange = function(attributeName, value, range) {
-      var document, ref, ref1;
+      var attribute, document, excludedAttributeName, i, len, ref, ref1, ref2;
       ref = this.expandRangeToLineBreaksAndSplitBlocks(range), document = ref.document, range = ref.range;
-      if (Trix.config.blockAttributes[attributeName].listAttribute) {
+      attribute = Trix.config.blockAttributes[attributeName];
+      if (attribute.listAttribute) {
         document = document.removeLastListAttributeAtRange(range, {
           exceptAttributeName: attributeName
         });
         ref1 = document.convertLineBreaksToBlockBreaksInRange(range), document = ref1.document, range = ref1.range;
       } else {
         document = document.consolidateBlocksAtRange(range);
+      }
+      if (attribute.excludesAttributes) {
+        ref2 = attribute.excludesAttributes;
+        for (i = 0, len = ref2.length; i < len; i++) {
+          excludedAttributeName = ref2[i];
+          document = document.removeAttributeAtRange(excludedAttributeName, range);
+        }
       }
       return document.addAttributeAtRange(attributeName, value, range);
     };

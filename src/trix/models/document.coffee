@@ -222,11 +222,16 @@ class Trix.Document extends Trix.Object
   applyBlockAttributeAtRange: (attributeName, value, range) ->
     {document, range} = @expandRangeToLineBreaksAndSplitBlocks(range)
 
-    if Trix.config.blockAttributes[attributeName].listAttribute
+    attribute = Trix.config.blockAttributes[attributeName]
+    if attribute.listAttribute
       document = document.removeLastListAttributeAtRange(range, exceptAttributeName: attributeName)
       {document, range} = document.convertLineBreaksToBlockBreaksInRange(range)
     else
       document = document.consolidateBlocksAtRange(range)
+
+    if attribute.excludesAttributes
+      for excludedAttributeName in attribute.excludesAttributes
+        document = document.removeAttributeAtRange(excludedAttributeName, range)
 
     document.addAttributeAtRange(attributeName, value, range)
 

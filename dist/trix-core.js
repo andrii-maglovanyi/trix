@@ -1302,6 +1302,7 @@ http://trix-editor.org/
     bullet: {
       tagName: "li",
       listAttribute: "bulletList",
+      excludesAttributes: ["heading1", "heading2", "heading3"],
       test: function(element) {
         return Trix.tagName(element.parentNode) === attributes[this.listAttribute].tagName;
       }
@@ -1313,6 +1314,7 @@ http://trix-editor.org/
     number: {
       tagName: "li",
       listAttribute: "numberList",
+      excludesAttributes: ["heading1", "heading2", "heading3"],
       test: function(element) {
         return Trix.tagName(element.parentNode) === attributes[this.listAttribute].tagName;
       }
@@ -1320,6 +1322,7 @@ http://trix-editor.org/
     heading1: {
       heading: true,
       tagName: "h1",
+      excludesAttributes: ["bulletList", "bullet", "numberList", "number"],
       test: function(element) {
         return Trix.tagName(element) === "h1";
       }
@@ -1327,6 +1330,7 @@ http://trix-editor.org/
     heading2: {
       heading: true,
       tagName: "h2",
+      excludesAttributes: ["bulletList", "bullet", "numberList", "number"],
       test: function(element) {
         return Trix.tagName(element) === "h2";
       }
@@ -1334,6 +1338,7 @@ http://trix-editor.org/
     heading3: {
       heading: true,
       tagName: "h3",
+      excludesAttributes: ["bulletList", "bullet", "numberList", "number"],
       test: function(element) {
         return Trix.tagName(element) === "h3";
       }
@@ -3296,7 +3301,7 @@ http://trix-editor.org/
       var attachment, constructor, view;
       attachment = this.block.getAttachment();
       constructor = attachment.isPreviewable() ? Trix.PreviewableAttachmentView : Trix.AttachmentView;
-      view = this.createChildView(constructor, attachment);
+      view = this.findOrCreateCachedChildView(constructor, attachment);
       return view.getNodes();
     };
 
@@ -5690,15 +5695,23 @@ http://trix-editor.org/
     };
 
     Document.prototype.applyBlockAttributeAtRange = function(attributeName, value, range) {
-      var document, ref, ref1;
+      var attribute, document, excludedAttributeName, i, len, ref, ref1, ref2;
       ref = this.expandRangeToLineBreaksAndSplitBlocks(range), document = ref.document, range = ref.range;
-      if (Trix.config.blockAttributes[attributeName].listAttribute) {
+      attribute = Trix.config.blockAttributes[attributeName];
+      if (attribute.listAttribute) {
         document = document.removeLastListAttributeAtRange(range, {
           exceptAttributeName: attributeName
         });
         ref1 = document.convertLineBreaksToBlockBreaksInRange(range), document = ref1.document, range = ref1.range;
       } else {
         document = document.consolidateBlocksAtRange(range);
+      }
+      if (attribute.excludesAttributes) {
+        ref2 = attribute.excludesAttributes;
+        for (i = 0, len = ref2.length; i < len; i++) {
+          excludedAttributeName = ref2[i];
+          document = document.removeAttributeAtRange(excludedAttributeName, range);
+        }
       }
       return document.addAttributeAtRange(attributeName, value, range);
     };
