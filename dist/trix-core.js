@@ -1390,21 +1390,11 @@ http://trix-editor.org/
   Trix.config.textAttributes = {
     bold: {
       tagName: "b",
-      inheritable: true,
-      parser: function(element) {
-        var style;
-        style = window.getComputedStyle(element);
-        return style["fontWeight"] === "bold" || style["fontWeight"] >= 700;
-      }
+      inheritable: true
     },
     italic: {
       tagName: "i",
-      inheritable: true,
-      parser: function(element) {
-        var style;
-        style = window.getComputedStyle(element);
-        return style["fontStyle"] === "italic";
-      }
+      inheritable: true
     },
     href: {
       groupTagName: "a",
@@ -1421,12 +1411,7 @@ http://trix-editor.org/
     },
     underline: {
       tagName: "u",
-      inheritable: true,
-      parser: function(element) {
-        var style;
-        style = window.getComputedStyle(element);
-        return style["textDecoration"] === "underline";
-      }
+      inheritable: true
     },
     frozen: {
       style: {
