@@ -2,7 +2,8 @@
  findClosestElementFromNode, elementContainsNode, nodeIsAttachmentWrapper, extend} = Trix
 
 class Trix.HTMLParser extends Trix.BasicObject
-  allowedAttributes = "style href src width height class target data-eid data-href data-mime-type data-rel".split(" ")
+  allowedAttributes = "style width height class target data-eid data-href data-mime-type data-rel".split(" ")
+  allowedProtocols = "http https".split(" ")
 
   @parse: (html, options) ->
     parser = new this html, options
@@ -250,8 +251,8 @@ class Trix.HTMLParser extends Trix.BasicObject
       switch node.nodeType
         when Node.ELEMENT_NODE
           element = node
-          for {name} in [element.attributes...]
-            unless name in allowedAttributes or name.indexOf("data-trix") is 0
+          for {name, value} in [element.attributes...]
+            unless isAllowedAttribute(name, value)
               element.removeAttribute(name)
         when Node.COMMENT_NODE
           nodesToRemove.push(node)
@@ -268,6 +269,15 @@ class Trix.HTMLParser extends Trix.BasicObject
     html
       .replace(/>\n+</g, "><")
       .replace(/>\ +</g, "> <")
+
+  isAllowedAttribute = (name, value) ->
+    if name is "href" or name is "src"
+      for protocol in allowedProtocols
+        return true if value.indexOf(protocol + ":") is 0
+
+    return true if name.indexOf("data-trix") is 0
+
+    return name in allowedAttributes
 
   getBlockElementMargin = (element) ->
     style = window.getComputedStyle(element)

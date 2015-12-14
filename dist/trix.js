@@ -2563,7 +2563,6 @@ window.CustomElements.addModule(function(scope) {
       }
     },
     attachment: {
-      tagName: "div",
       className: "shareitem"
     }
   };
@@ -6148,11 +6147,13 @@ window.CustomElements.addModule(function(scope) {
   arraysAreEqual = Trix.arraysAreEqual, normalizeSpaces = Trix.normalizeSpaces, makeElement = Trix.makeElement, tagName = Trix.tagName, walkTree = Trix.walkTree, findClosestElementFromNode = Trix.findClosestElementFromNode, elementContainsNode = Trix.elementContainsNode, nodeIsAttachmentWrapper = Trix.nodeIsAttachmentWrapper, extend = Trix.extend;
 
   Trix.HTMLParser = (function(superClass) {
-    var allowedAttributes, blockForAttachment, blockForAttributes, getAttachmentAttributes, getBlockElementMargin, getImageDimensions, nodeFilter, pieceForString, removeInsignificantWhitespace, sanitizeHTML;
+    var allowedAttributes, allowedProtocols, blockForAttachment, blockForAttributes, getAttachmentAttributes, getBlockElementMargin, getImageDimensions, isAllowedAttribute, nodeFilter, pieceForString, removeInsignificantWhitespace, sanitizeHTML;
 
     extend1(HTMLParser, superClass);
 
-    allowedAttributes = "style href src width height class target data-eid data-href data-mime-type data-rel".split(" ");
+    allowedAttributes = "style width height class target data-eid data-href data-mime-type data-rel".split(" ");
+
+    allowedProtocols = "http https".split(" ");
 
     HTMLParser.parse = function(html, options) {
       var parser;
@@ -6523,7 +6524,7 @@ window.CustomElements.addModule(function(scope) {
     };
 
     sanitizeHTML = function(html) {
-      var body, doc, element, head, i, j, k, len, len1, len2, name, node, nodesToRemove, ref, ref1, style, walker;
+      var body, doc, element, head, i, j, k, len, len1, len2, name, node, nodesToRemove, ref, ref1, ref2, style, value, walker;
       html = removeInsignificantWhitespace(html);
       doc = document.implementation.createHTMLDocument("");
       doc.documentElement.innerHTML = html;
@@ -6542,8 +6543,8 @@ window.CustomElements.addModule(function(scope) {
             element = node;
             ref1 = slice.call(element.attributes);
             for (j = 0, len1 = ref1.length; j < len1; j++) {
-              name = ref1[j].name;
-              if (!(indexOf.call(allowedAttributes, name) >= 0 || name.indexOf("data-trix") === 0)) {
+              ref2 = ref1[j], name = ref2.name, value = ref2.value;
+              if (!isAllowedAttribute(name, value)) {
                 element.removeAttribute(name);
               }
             }
@@ -6566,6 +6567,22 @@ window.CustomElements.addModule(function(scope) {
 
     removeInsignificantWhitespace = function(html) {
       return html.replace(/>\n+</g, "><").replace(/>\ +</g, "> <");
+    };
+
+    isAllowedAttribute = function(name, value) {
+      var i, len, protocol;
+      if (name === "href" || name === "src") {
+        for (i = 0, len = allowedProtocols.length; i < len; i++) {
+          protocol = allowedProtocols[i];
+          if (value.indexOf(protocol + ":") === 0) {
+            return true;
+          }
+        }
+      }
+      if (name.indexOf("data-trix") === 0) {
+        return true;
+      }
+      return indexOf.call(allowedAttributes, name) >= 0;
     };
 
     getBlockElementMargin = function(element) {
