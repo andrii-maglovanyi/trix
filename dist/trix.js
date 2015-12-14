@@ -7569,9 +7569,14 @@ window.CustomElements.addModule(function(scope) {
     };
 
     Composition.prototype.insertAttachment = function(attachment) {
-      var block;
+      var block, endPosition, insertAtEnd, ref, startPosition;
+      ref = this.getSelectedRange(), startPosition = ref[0], endPosition = ref[1];
+      insertAtEnd = endPosition === this.document.getLength() - 1;
       block = Trix.Block.blockForAttachment(attachment);
-      return this.insertBlock(block);
+      this.insertBlock(block);
+      if (insertAtEnd) {
+        return this.insertBlock();
+      }
     };
 
     Composition.prototype.deleteInDirection = function(direction) {
