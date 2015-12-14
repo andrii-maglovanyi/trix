@@ -174,11 +174,8 @@ class Trix.Composition extends Trix.BasicObject
 
       range = @getExpandedRangeInDirection(direction)
 
-      if direction is "backward"
-        attachment = @getAttachmentAtRange(range)
-
-    if attachment
-      @editAttachment(attachment)
+    if attachment = @getAttachmentAtRange(range)
+      @removeAttachment(attachment)
       false
     else
       @setDocument(@document.removeTextAtRange(range))
