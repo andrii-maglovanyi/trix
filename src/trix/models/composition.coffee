@@ -153,14 +153,15 @@ class Trix.Composition extends Trix.BasicObject
       @insertAttachment(attachment)
 
   insertAttachment: (attachment) ->
-    [startPosition, endPosition] = @getSelectedRange()
-    insertAtEnd = endPosition is @document.getLength() - 1
-
     block = Trix.Block.blockForAttachment(attachment)
-    @insertBlock(block)
+    blocks = [block]
 
-    if insertAtEnd
-      @insertBlock()
+    [startPosition, endPosition] = @getSelectedRange()
+    if endPosition is @document.getLength() - 1
+      blocks.push(new Trix.Block)
+
+    document = new Trix.Document blocks
+    @insertDocument(document)
 
   deleteInDirection: (direction) ->
     range = [startPosition, endPosition] = @getSelectedRange()

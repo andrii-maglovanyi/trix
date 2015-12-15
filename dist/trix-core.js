@@ -6367,14 +6367,15 @@ http://trix-editor.org/
     };
 
     Composition.prototype.insertAttachment = function(attachment) {
-      var block, endPosition, insertAtEnd, ref, startPosition;
-      ref = this.getSelectedRange(), startPosition = ref[0], endPosition = ref[1];
-      insertAtEnd = endPosition === this.document.getLength() - 1;
+      var block, blocks, document, endPosition, ref, startPosition;
       block = Trix.Block.blockForAttachment(attachment);
-      this.insertBlock(block);
-      if (insertAtEnd) {
-        return this.insertBlock();
+      blocks = [block];
+      ref = this.getSelectedRange(), startPosition = ref[0], endPosition = ref[1];
+      if (endPosition === this.document.getLength() - 1) {
+        blocks.push(new Trix.Block);
       }
+      document = new Trix.Document(blocks);
+      return this.insertDocument(document);
     };
 
     Composition.prototype.deleteInDirection = function(direction) {
