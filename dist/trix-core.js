@@ -5655,7 +5655,9 @@ http://trix-editor.org/
       blockList = this.blockList;
       this.eachBlockAtRange(range, function(block, textRange, index) {
         if (attribute === "attachment") {
-          return blockList = blockList.removeObjectAtIndex(index);
+          if (textRange[0] !== textRange[1]) {
+            return blockList = blockList.removeObjectAtIndex(index);
+          }
         } else if (Trix.config.blockAttributes[attribute]) {
           return blockList = blockList.editObjectAtIndex(index, function() {
             return block.removeAttribute(attribute);
