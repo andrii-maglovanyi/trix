@@ -10,7 +10,7 @@ http://trix-editor.org/
 
 }).call(this);
 (function() {
-  this.Trix = {
+  window.Trix= {
     VERSION: "0.9.2",
     ZERO_WIDTH_SPACE: "\uFEFF",
     NON_BREAKING_SPACE: "\u00A0",
